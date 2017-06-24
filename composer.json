@@ -1,0 +1,20 @@
+{
+    "name": "wppl/asse-http",
+    "type": "wordpress-plugin",
+    "description": "Asse HTTP for Wordpress",
+    "keywords": [
+        "wordpress",
+        "plugin",
+        "http"
+    ],
+    "homepage": "https://as-stash.axelspringer.de/projects/WPPL/repos/asse-http",
+    "license": "proprietary",
+    "authors": [
+    ],
+    "require": {
+        "composer/installers": "1.2.*"
+    },
+    "extra": {
+        "installer-name": "asse-http"
+    }
+}
