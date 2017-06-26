@@ -196,16 +196,20 @@ class AsseHttp {
 
     $this->options = apply_filters( 'asse_http_add_headers', $this->options );
 
-    if ( $wp_query->is_feed() || $wp_query->is_archive() || $wp_query->is_search() ) {
-        $this->send_headers_for_archive();
-    } elseif ( $wp_query->is_singular() ) {
-        $this->send_headers_for_object();
+    if ( $wp_query->is_singular() ) {
+       $this->send_headers_for_object();
     }
 
     return;
   }
 
   public function send_http_headers( $post, $mtime ) {
+    global $wp_query;
+
+    if ( ! $wp_query->is_singular() ) {
+      return;
+    }
+
     $headers = [];
     $supported_headers = [
       'ETag',
@@ -245,6 +249,8 @@ class AsseHttp {
     foreach( $headers as $key => $value ) {
       header( sprintf('%s: %s', $key, $value) );
     }
+
+    if (  )
 
     if ( $this->options['add_etag'] &&
       isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
