@@ -250,8 +250,6 @@ class AsseHttp {
       header( sprintf('%s: %s', $key, $value) );
     }
 
-    if (  )
-
     if ( $this->options['add_etag'] &&
       isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
         if ( $headers['ETag'] !== stripslashes( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
