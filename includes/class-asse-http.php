@@ -2,108 +2,13 @@
 
 class AsseHttp {
 
-	const VERSION                 = ASSE_HTTP_VERSION;
-  const PLUGIN_NAME             = ASSE_HTTP_PLUGIN_NAME;
-
-  const CACHE_CONTROL_HEADERS   = [
-    'max-age',
-    's-maxage',
-    'min-fresh',
-    'must-revalidate',
-    'no-cache',
-    'no-store',
-    'no-transform',
-    'public',
-    'private',
-    'proxy-revalidate',
-    'stale-while-revalidate',
-    'stale-if-error'
-  ];
-
-  const CACHE_CONTROL_DEFAULTS  = [
-    'front_page'   => [
-        'max-age'  => 300,           //                5 min
-        's-maxage' => 150,            //                2 min 30 sec
-        'public'   => true,
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    'single'      => [
-        'max-age'  => 600,           //               10 min
-        's-maxage' => 60,            //                1 min
-        'mmulti'   => 1,              // enabled,
-        'public'   => true,
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    'page'        => [
-        'max-age'  => 1200,          //               20 min
-        's-maxage' => 300,            //                5 min
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    'home'         => [
-        'max-age'  => 180,           //                3 min
-        's-maxage' => 45,            //                      45 sec
-        'paged'    => 5,              //                       5 sec
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    'category'   => [
-        'max-age'  => 900,           //               15 min
-        's-maxage' => 300,           //                5 min
-        'paged'    => 8,              //                       8 sec
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    'tag'         => [
-        'max-age'  => 900,           //               15 min
-        's-maxage' => 300,           //                5 min            //                       8 sec
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    'author'      => [
-        'max-age'  => 1800,          //               30 min
-        's-maxage' => 600,           //               10 min
-        'paged'    => 10,             //                      10 sec
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    'date'        =>  [
-        'max-age'  => 10800,         //      3 hours
-        's-maxage' => 2700,          //               45 min
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    'feed'        => [
-        'max-age'  => 5400,          //       1 hours 30 min
-        's-maxage' => 600,            //               10 min
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    'attachment'   => [
-        'max-age'  => 10800,         //       3 hours
-        's-maxage' => 2700,          //               45 min
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    'search'       => [
-        'max-age'  => 1800,          //               30 min
-        's-maxage' => 600,            //               10 min
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ],
-    '404'     => [
-        'max-age'  => 900,           //               15 min
-        's-maxage' => 300,            //                5 min
-        'stale-while-revalidate' => 3600 * 24,
-        'stale-if-error' => 3600 * 24 * 3
-    ]
-  ];
-
 	protected $settings;
 	protected $options;
+  protected $headers;
 
+  /**
+   * Constructor
+   */
 	public function __construct() {
 		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 
@@ -113,65 +18,188 @@ class AsseHttp {
 
 		$this->maybe_update();
 
-		$this->settings       = new AsseHttpSettings( self::PLUGIN_NAME );
+		$this->settings       = new AsseHttpSettings( ASSE_HTTP_PLUGIN_NAME );
 		$this->options        = $this->get_options();
+    $this->headers        = array();
 
 		$this->register_hooks();
 	}
 
+  /**
+   * Register Hooks
+   *
+   * @return void
+   */
 	public function register_hooks() {
-		add_action( 'wp', array( &$this, 'send_cache_control_headers' ), 0 );
-    add_action( 'template_redirect', array( &$this, 'add_http_headers' ) );
+		add_action( 'wp', array( &$this, 'send_cache_control_header' ) );
+    add_action( 'template_redirect', array( &$this, 'try_rewrite_categories' ) );
+    add_action( 'template_redirect', array( &$this, 'try_catch_404' ) );
+    add_action( 'template_redirect', array( &$this, 'send_extra_headers' ) );
+    add_action( 'template_redirect', array( &$this, 'send_http_403' ) );
 	}
 
-  public function cache_control_directives() {
+  /**
+   * Try to rewrite urls
+   *
+   */
+  public function try_rewrite_categories() {
+    global $wp_query;
+    global $wp;
+
+    $wp_queried_object = get_queried_object();
+
+    if ( ! $this->options['try_rewrite_categories']
+      || ! ( isset ( $wp->query_vars['category_name'] ) && isset( $wp->query_vars['name'] ) ) ) {
+      return;
+    }
+
+    if ( ! $wp_query->is_single() ) {
+      return;
+    }
+
+    $permalink      = get_permalink( $wp_queried_object->ID );
+    $wp_url         = wp_parse_url( $permalink );
+    $wp_url_pattern = '/^\/' . $wp->query_vars['category_name'] . '/';
+
+    if ( ! preg_match( $wp_url_pattern, $wp_url['path'] ) ) {
+      $this->send_http_header( 'Location: ' . $permalink, true, 301 );
+
+      exit();
+    }
+  }
+
+  /**
+   * Try to catch 404 of not found singles
+   *
+   * @return void
+   */
+  public function try_catch_404() {
+    global $wp_query;
+    global $wpdb;
+    global $wp;
+
+    if ( ! $this->options['try_catch_404'] ) {
+      return;
+    }
+
+    if ( $wp_query->is_404()
+      && isset( $wp->query_vars['name'] ) ) { // detect queries
+      $results = $wpdb->get_results( $wpdb->prepare(
+        "
+        SELECT ID
+        FROM wp_posts
+        WHERE post_type IN ( 'page', 'post', 'attachment' )
+        AND post_name = %s
+        ", $wpdb->esc_like( $wp->query_vars['name'] )
+      ), OBJECT );
+
+      // exit if not unique
+      if ( count( $results ) !== 1 ) {
+        return;
+      }
+
+      $post = current( $results );
+      $this->send_http_header( 'Location: ' . get_permalink( $post->ID ), true, 301 );
+
+      exit();
+    }
+  }
+
+  /**
+   * Send Cache-Control Header
+   *
+   * @return void
+   */
+  public function send_cache_control_header() {
+
+    if ( headers_sent() ) {
+      return;
+    }
+
+    if ( ! isset( $this->options['send_cache_control_header'] )
+      || ! $this->options['send_cache_control_header'] ) {
+      return;
+    }
+
+    if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+      return;
+    } elseif( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST ) {
+      return;
+    } elseif( defined('REST_REQUEST') && REST_REQUEST ) {
+      return;
+    } elseif ( is_admin() ) {
+      return;
+    }
+
+    $directives = $this->get_cache_control_directives();
+
+    if ( ! empty( $directives ) ) {
+      $this->send_http_header( 'Cache-Control: ' . $directives, true );
+    }
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  public function get_cache_control_directives() {
     global $wp_query;
 
-    $directives = null;
+    $directives   = null;
 
-    if ( ! $this->should_cache() ) {
-      $directives = $this->cache_control_directive( null );
+    if ( ! ( is_preview()
+      || is_user_logged_in()
+      || is_trackback()
+      || is_admin() ) ) {
+      $directives = AsseHttp::cache_control_directive( null );
     }
 
     if ( $wp_query->is_front_page() && ! is_paged() ) {
-        $directives = $this->cache_control_directive( 'front_page' );
+        $directives = AsseHttp::cache_control_directive( 'front_page' );
     } elseif ( $wp_query->is_single() ) {
-        $directives = $this->cache_control_directive( 'single' );
+        $directives = AsseHttp::cache_control_directive( 'single' );
     } elseif ( $wp_query->is_page() ) {
-        $directives = $this->cache_control_directive( 'page' );
+        $directives = AsseHttp::cache_control_directive( 'page' );
     } elseif ( $wp_query->is_home() ) {
-        $directives = $this->cache_control_directive( 'home' );
+        $directives = AsseHttp::cache_control_directive( 'home' );
     } elseif ( $wp_query->is_category() ) {
-        $directives = $this->cache_control_directive( 'category' );
+        $directives = AsseHttp::cache_control_directive( 'category' );
     } elseif ( $wp_query->is_tag() ) {
-        $directives = $this->cache_control_directive( 'tag' );
+        $directives = AsseHttp::cache_control_directive( 'tag' );
     } elseif ( $wp_query->is_author() ) {
-        $directives = $this->cache_control_directive( 'author' );
+        $directives = AsseHttp::cache_control_directive( 'author' );
     } elseif ( $wp_query->is_attachment() ) {
-        $directives = $this->cache_control_directive( 'attachement' );
+        $directives = AsseHttp::cache_control_directive( 'attachement' );
     } elseif ( $wp_query->is_search() ) {
-        $directives = $this->cache_control_directive( 'search' );
+        $directives = AsseHttp::cache_control_directive( 'search' );
     } elseif ( $wp_query->is_404() ) {
-        $directives = $this->cache_control_directive( '404' );
+        $directives = AsseHttp::cache_control_directive( '404' );
     } elseif ( $wp_query->is_date() ) {
-        if ( ( is_year() && strcmp(get_the_time('Y'), date('Y')) < 0 ) ||
-          ( is_month() && strcmp(get_the_time('Y-m'), date('Y-m')) < 0 ) ||
-          ( ( is_day() || is_time() ) && strcmp(get_the_time('Y-m-d'), date('Y-m-d')) < 0 ) ) {
-            $directives = $this->cache_control_directive( 'date' );
-        } else {
-            $directives = $this->cache_control_directive( 'home' );
-        }
+      if ( ( is_year() && strcmp(get_the_time('Y'), date('Y')) < 0 ) ||
+        ( is_month() && strcmp(get_the_time('Y-m'), date('Y-m')) < 0 ) ||
+        ( ( is_day() || is_time() ) && strcmp(get_the_time('Y-m-d'), date('Y-m-d')) < 0 ) ) {
+          $directives = AsseHttp::cache_control_directive( 'date' );
+      } else {
+          $directives = AsseHttp::cache_control_directive( 'home' );
+      }
     }
 
-    return apply_filters( 'asse_http_cache_control_directives', $directives);
+    return apply_filters( 'asse_http_get_cache_control_directives', $directives);
   }
 
-  public function cache_control_directive( $default ) {
-    if ( empty( $default ) || ! array_key_exists( $default, self::CACHE_CONTROL_DEFAULTS ) ) {
-        return 'no-cache, no-store, must-revalidate';
+  /**
+   * Cache-Control directives
+   *
+   * @param [type] $cache_default
+   * @return void
+   */
+  public static function get_cache_control_directive( $cache_default ) {
+    if ( empty( $cache_default ) || ! @array_key_exists( $cace_default, ASSE_HTTP_CACHE_CONTROL_HEADERS ) ) {
+      return 'no-cache, no-store, must-revalidate';
     }
 
-    $default = array_intersect_key( self::CACHE_CONTROL_DEFAULTS[ $default ], array_flip( self::CACHE_CONTROL_HEADERS ) );
+    $cache_default = array_intersect_key( ASSE_HTTP_CACHE_CONTROL_HEADERS[ $cache_default ], array_flip( ASSE_HTTP_CACHE_CONTROL_HEADERS ) );
     $directives = [];
 
     foreach( $default as $key => $value ) {
@@ -181,115 +209,89 @@ class AsseHttp {
     return implode( ', ', $directives );
   }
 
-  public function add_http_headers() {
+
+  /**
+   * Send extra headers
+   *
+   * @return void
+   */
+  public function send_extra_headers() {
     global $wp_query;
 
-    if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-        return;
-    } elseif( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST ) {
-        return;
-    } elseif( defined('REST_REQUEST') && REST_REQUEST ) {
-        return;
-    } elseif ( is_admin() ) {
-        return;
+    if ( headers_sent() ) {
+      return;
     }
 
-    $this->options = apply_filters( 'asse_http_add_headers', $this->options );
+    if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+      return;
+    } elseif( defined('XMLRPC_REQUEST') && XMLRPC_REQUEST ) {
+      return;
+    } elseif( defined('REST_REQUEST') && REST_REQUEST ) {
+      return;
+    } elseif ( is_admin() ) {
+      return;
+    }
 
     if ( $wp_query->is_singular() ) {
-       $this->send_headers_for_object();
+       $this->send_extra_headers_for_object();
     }
 
     return;
   }
 
-  public function send_http_headers( $post, $mtime ) {
+  /**
+   * Send extra HTTP Headers
+   *
+   * @param [type] $post
+   * @param [type] $mtime
+   * @return void
+   */
+  public function send_extra_http_headers( $post, $mtime ) {
     global $wp_query;
 
     if ( ! $wp_query->is_singular() ) {
       return;
     }
 
-    $headers = [];
-    $supported_headers = [
-      'ETag',
-      'Last-Modified',
-      'Expires',
-      'Cache-Control',
-      'Pragma'
-    ];
-
     if ( $this->options['add_etag'] ) {
-      $headers['ETag'] = $this->get_etag_header( $post, $mtime );
+      $this->headers['ETag']  = AsseHttp::etag( $post, $mtime, $this->options['generate_weak_etag'], $this->options['etag_salt'] );
     }
 
     if ( $this->options['add_last_modified'] ) {
-      $headers['Last-Modified'] = $this->get_last_modified_header( $post, $mtime );
+      $this->headers['Last-Modified'] = AsseHttp::last_modified( $mtime );
     }
 
     if ( $this->options['add_expires'] ) {
-      $headers['Expires'] = $this->get_expires_header( $post, $mtime );
+      $this->headers['Expires'] = AsseHttp::expires( $this->options['expires_max_age'] );
     }
 
     if ( $this->options['add_backwards_cache_control'] ) {
-      $headers['Pragma'] = $this->get_pragma_header( $post, $mtime );
+      $this->headers['Pragma'] = AsseHttp::pragma( $this->options['expires_max_age'] );
     }
 
-    $headers = apply_filters( 'asse_http_add_headers_send', $headers );
+    $this->headers = apply_filters( 'asse_http_send_extra_headers', $this->headers );
 
-    if ( headers_sent() ) {
-      // should error?!
-      return;
-    }
-
-    // if ( true === $tho['remove_pre_existing_headers'] ) {
-    //     // should do something ;)
-    // }
-
-    foreach( $headers as $key => $value ) {
-      header( sprintf('%s: %s', $key, $value) );
-    }
-
-    if ( $this->options['add_etag'] &&
-      isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
-        if ( $headers['ETag'] !== stripslashes( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
-          return;
-        }
-
-        if ( false === http_response_code() ) {
-          http_response_code( 304 );
-        } else {
-          header( 'HTTP/1.1 304 Not Modified' );
-        }
-        exit;
-    }
-
-    if ( $this->options['add_last_modified'] &&
-      isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
-        if ( ! ( strtotime( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) >= $mtime ) ) {
-          return;
-        }
-
-        if ( false === http_response_code() ) {
-          http_response_code( 304 );
-        } else {
-          header( 'HTTP/1.1 304 Not Modified' );
-        }
-        exit;
+    foreach( $this->headers as $directive => $value ) {
+      $this->send_http_header( $directive . ': ' . $value, true );
     }
   }
 
-  public function send_headers_for_object() {
+  /**
+   * Send extra HTTP Headers for object
+   *
+   * @return void
+   */
+  public function send_extra_headers_for_object() {
     $post = get_queried_object();
 
     if ( ! is_object( $post) || ! isset( $post->post_type ) ) {
-        return;
+      return;
     }
 
     // should check for post types
 
     if ( post_password_required() ) {
-        return;
+      return;
     }
 
     $post_mtime = $post->post_modified_gmt;
@@ -297,114 +299,170 @@ class AsseHttp {
 
     $mtime = $post_mtime_unix;
 
-    $this->send_http_headers( $post, $mtime );
+    $this->send_extra_http_headers( $post, $mtime );
   }
 
-  public function send_headers_for_archive() {
-    global $posts;
-
-    if ( empty($posts) ) {
-        return;
-    }
-    $post = $posts[0];
-
-    if ( ! is_object($post) || ! isset($post->post_type) ) {
-        return;
-    }
-
-    $post_mtime = $post->post_modified_gmt;
-    $mtime = strtotime( $post_mtime );
-
-    $this->send_http_headers( $post, $mtime );
-  }
-
-  public function get_last_modified_header( $post, $mtime ) {
+  /**
+   * Get HTTP Last-Modified
+   *
+   * @param [type] $mtime
+   * @return void
+   */
+  public static function last_modified( $mtime ) {
     return str_replace( '+0000', 'GMT', gmdate('r', $mtime) );
   }
 
-  public function get_expires_header( $post, $mtime ) {
-    return str_replace( '+0000', 'GMT', gmdate('r', time() + $this->options['expires_max_age'] ) );
+  /**
+   * Get HTTP Expires
+   *
+   * @param [type] $max_age
+   * @return void
+   */
+  public static function expires( $max_age ) {
+    return str_replace( '+0000', 'GMT', gmdate('r', time() + $max_age ) );
   }
 
-  public function get_pragma_header( $post, $mtime ) {
-    if ( intval($this->options['cache_max_age_seconds']) > 0 ) {
+  /**
+   * Get HTTP Pragma
+   *
+   * @param [type] $max_age
+   * @return void
+   */
+  public static function pragma( $max_age ) {
+    if ( intval( $max_age ) > 0 ) {
       return 'public';
     };
     return 'no-cache';
   }
 
-  public function get_etag_header( $post, $mtime ) {
+  /**
+   * Get HTTP ETag
+   *
+   * @param [type] $post
+   * @param [type] $mtime
+   * @param [type] $weak_etag
+   * @return void
+   */
+  public static function etag( $post, $mtime, $weak_etag, $salt = '' ) {
     global $wp;
 
-    $to_hash  = array( $mtime, $post->post_date_gmt, $post->guid, $post->ID, serialize( $wp->query_vars ), self::VERSION );
+    $to_hash  = array( $mtime, $post->post_date_gmt, $post->guid, $post->ID, serialize( $wp->query_vars ), $salt );
     $etag     = hash( 'crc32b', serialize( $to_hash ) );
 
-    if ( $this->options['generate_weak_etag'] ) {
+    if ( $weak_etag ) {
       return sprintf( 'W/"%s"', $etag );
     }
 
     return sprintf( '"%s"', $etag );
   }
 
-  public function send_cache_control_headers() {
-    if ( is_admin() ) {
-      return;
-    }
+  /**
+   * Send HTTP 403
+   *
+   * @return void
+   */
+  public function send_http_403() {
+    if ( $this->options['add_etag'] &&
+      isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
 
-    if ( $wp_env = getenv('WP_LAYER') ) {
-      if ( $wp_env !== 'frontend' ) {
+      if ( $this->headers['ETag'] !== stripslashes( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
         return;
       }
+
+      if ( false === http_response_code() ) {
+        http_response_code( 304 );
+      } else {
+        header( 'HTTP/1.1 304 Not Modified' );
+      }
+
+      exit;
     }
 
-    if ( ! isset( $this->options['send_cache_control_headers'] )
-      || ! $this->options['send_cache_control_headers'] ) {
-      return;
-    }
+    if ( $this->options['add_last_modified'] &&
+      isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
 
-    $directives = $this->cache_control_directives();
+      if ( ! ( strtotime( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) >= $mtime ) ) {
+        return;
+      }
 
-    if ( ! empty( $directives ) ) {
-      header ( 'Cache-Control: ' . $directives , true );
+      if ( false === http_response_code() ) {
+        http_response_code( 304 );
+      } else {
+        header( 'HTTP/1.1 304 Not Modified' );
+      }
+
+      exit;
     }
   }
 
-  public function should_cache() {
-    return ! ( is_preview() || is_user_logged_in() || is_trackback() || is_admin() );
+  /**
+   * Send HTTP Header
+   *
+   * @param [type] $header
+   * @param boolean $replace
+   * @return void
+   */
+  public function send_http_header( $header, $replace = false, $response_code = null ) {
+    $header = apply_filters( 'asse_http_send_http_header', $header );
+    header( $header, $replace, $response_code );
   }
 
+  /**
+   * Maybe do some update things
+   *
+   * @return void
+   */
 	public function maybe_update() {
-    $option  = self::PLUGIN_NAME . '_version';
+    $option  = ASSE_HTTP_PLUGIN_NAME . '_version';
 		$version = get_option( $option );
 
 		if ( false === $version ) {
       // something to update
 		}
 
-		update_option( $option, AsseHttp::VERSION );
+		update_option( $option, ASSE_HTTP_VERSION );
 	}
 
+  /**
+   * Get options
+   *
+   * @return array
+   */
   public function get_options() {
     $options = array(
-      'send_cache_control_headers'    => get_option( 'asse_http_send_cache_control_headers' ),
+      'send_cache_control_header'     => get_option( 'asse_http_send_cache_control_header' ),
       'add_etag'                      => get_option( 'asse_http_add_etag' ),
       'generate_weak_etag'            => get_option( 'asse_http_generate_weak_etag' ),
       'add_last_modified'             => get_option( 'asse_http_add_last_modified' ),
       'add_expires'                   => get_option( 'asse_http_add_expires' ),
       'add_backwards_cache_control'   => get_option( 'asse_http_add_backwards_cache_control' ),
-      'expires_max_age'               => get_option( 'asse_http_expires_max_age' )
+      'expires_max_age'               => get_option( 'asse_http_expires_max_age' ),
+      'etag_salt'                     => get_option( 'asse_http_etag_salt' ),
+      'try_rewrite_categories'        => get_option( 'asse_http_try_rewrite_categories' ),
+      'try_catch_404'                 => get_option( 'asse_http_try_catch_404' )
     );
 
     return $options;
   }
 
+  /**
+   * Activate plugin
+   *
+   * @return void
+   */
 	public static function activate() {
-    $option  = self::PLUGIN_NAME . '_version';
-		add_option( $option, AsseHttp::VERSION );
+    $option  = ASSE_HTTP_PLUGIN_NAME . '_version';
+		add_option( $option, ASSE_HTTP_VERSION );
 	}
 
+  /**
+   * Deactivate plugin
+   *
+   * @return void
+   */
 	public static function deactivate() {
-
+    $option  = ASSE_HTTP_PLUGIN_NAME . '_version';
+    remove_option( $option, ASSE_HTTP_VERSION );
 	}
 
 }

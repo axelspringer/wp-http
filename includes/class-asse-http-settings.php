@@ -40,7 +40,7 @@ class AsseHttpSettings {
 		$asse_http = new AsseHttpSettingsSection( $args );
 
     $args = array(
-			'id'				    => 'asse_http_send_cache_control_headers',
+			'id'				    => 'asse_http_send_cache_control_header',
 			'title'				  => 'Cache-Control Headers',
 			'page'				  => $this->plugin_slug,
 			'section'			  => 'asse_http',
@@ -49,7 +49,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_send_cache_control_headers = new AsseHttpSettingsField( $args );
+		$asse_http_send_cache_control_header = new AsseHttpSettingsField( $args );
 
     $args = array(
 			'id'				    => 'asse_http_add_etag',
@@ -62,6 +62,18 @@ class AsseHttpSettings {
 			'option_group'	=> $this->plugin_slug,
 		);
 		$asse_http_add_etag = new AsseHttpSettingsField( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_etag_salt',
+			'title'				  => 'ETag Salt',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http',
+			'description'   => '',
+			'type'				  => 'text', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_etag_salt = new AsseHttpSettingsField( $args );
 
     $args = array(
 			'id'				    => 'asse_http_generate_weak_etag',
@@ -118,6 +130,30 @@ class AsseHttpSettings {
 			'section'			  => 'asse_http',
 			'description'   => 'Sekunden',
 			'type'				  => 'text', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_expires_max_age = new AsseHttpSettingsField( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_try_rewrite_categories',
+			'title'				  => 'Rewrite Categories',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http',
+			'description'   => 'Vorsicht!',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_try_rewrite_categories = new AsseHttpSettingsField( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_try_catch_404',
+			'title'				  => '404 Fehler abfangen',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http',
+			'description'   => 'Vorsicht!',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
