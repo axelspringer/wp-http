@@ -137,7 +137,7 @@ class AsseHttpSettings {
 
     $args = array(
 			'id'				    => 'asse_http_try_rewrite_categories',
-			'title'				  => 'Rewrite Categories',
+			'title'				  => 'Rewrite Kategorien',
 			'page'				  => $this->plugin_slug,
 			'section'			  => 'asse_http',
 			'description'   => 'Vorsicht!',
@@ -149,7 +149,7 @@ class AsseHttpSettings {
 
     $args = array(
 			'id'				    => 'asse_http_try_catch_404',
-			'title'				  => '404 Fehler abfangen',
+			'title'				  => 'Try Catch 404',
 			'page'				  => $this->plugin_slug,
 			'section'			  => 'asse_http',
 			'description'   => 'Vorsicht!',
