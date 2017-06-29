@@ -59,7 +59,7 @@ class AsseHttp {
 
     $permalink      = get_permalink( $wp_queried_object->ID );
     $wp_url         = wp_parse_url( $permalink );
-    $wp_url_pattern = '/^\/' . $wp->query_vars['category_name'] . '/';
+    $wp_url_pattern = '/^\/' . preg_quote( $wp->query_vars['category_name'], '/' ) . '/';
 
     if ( ! preg_match( $wp_url_pattern, $wp_url['path'] ) ) {
       $this->send_http_header( 'Location: ' . $permalink, true, 301 );
