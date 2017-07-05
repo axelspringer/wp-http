@@ -152,36 +152,36 @@ class AsseHttp {
       || is_user_logged_in()
       || is_trackback()
       || is_admin() ) ) {
-      $directives = AsseHttp::cache_control_directive( null );
+      $directives = AsseHttp::get_cache_control_directive( null );
     }
 
     if ( $wp_query->is_front_page() && ! is_paged() ) {
-        $directives = AsseHttp::cache_control_directive( 'front_page' );
+        $directives = AsseHttp::get_cache_control_directive( 'front_page' );
     } elseif ( $wp_query->is_single() ) {
-        $directives = AsseHttp::cache_control_directive( 'single' );
+        $directives = AsseHttp::get_cache_control_directive( 'single' );
     } elseif ( $wp_query->is_page() ) {
-        $directives = AsseHttp::cache_control_directive( 'page' );
+        $directives = AsseHttp::get_cache_control_directive( 'page' );
     } elseif ( $wp_query->is_home() ) {
-        $directives = AsseHttp::cache_control_directive( 'home' );
+        $directives = AsseHttp::get_cache_control_directive( 'home' );
     } elseif ( $wp_query->is_category() ) {
-        $directives = AsseHttp::cache_control_directive( 'category' );
+        $directives = AsseHttp::get_cache_control_directive( 'category' );
     } elseif ( $wp_query->is_tag() ) {
-        $directives = AsseHttp::cache_control_directive( 'tag' );
+        $directives = AsseHttp::get_cache_control_directive( 'tag' );
     } elseif ( $wp_query->is_author() ) {
-        $directives = AsseHttp::cache_control_directive( 'author' );
+        $directives = AsseHttp::get_cache_control_directive( 'author' );
     } elseif ( $wp_query->is_attachment() ) {
-        $directives = AsseHttp::cache_control_directive( 'attachement' );
+        $directives = AsseHttp::get_cache_control_directive( 'attachement' );
     } elseif ( $wp_query->is_search() ) {
-        $directives = AsseHttp::cache_control_directive( 'search' );
+        $directives = AsseHttp::get_cache_control_directive( 'search' );
     } elseif ( $wp_query->is_404() ) {
-        $directives = AsseHttp::cache_control_directive( '404' );
+        $directives = AsseHttp::get_cache_control_directive( '404' );
     } elseif ( $wp_query->is_date() ) {
       if ( ( is_year() && strcmp(get_the_time('Y'), date('Y')) < 0 ) ||
         ( is_month() && strcmp(get_the_time('Y-m'), date('Y-m')) < 0 ) ||
         ( ( is_day() || is_time() ) && strcmp(get_the_time('Y-m-d'), date('Y-m-d')) < 0 ) ) {
-          $directives = AsseHttp::cache_control_directive( 'date' );
+          $directives = AsseHttp::get_cache_control_directive( 'date' );
       } else {
-          $directives = AsseHttp::cache_control_directive( 'home' );
+          $directives = AsseHttp::get_cache_control_directive( 'home' );
       }
     }
 
