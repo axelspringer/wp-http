@@ -195,14 +195,14 @@ class AsseHttp {
    * @return void
    */
   public static function get_cache_control_directive( $cache_default ) {
-    if ( empty( $cache_default ) || ! @array_key_exists( $cace_default, ASSE_HTTP_CACHE_CONTROL_HEADERS ) ) {
+    if ( empty( $cache_default ) || ! @array_key_exists( $cache_default, ASSE_HTTP_CACHE_CONTROL_DEFAULTS ) ) {
       return 'no-cache, no-store, must-revalidate';
     }
 
-    $cache_default = array_intersect_key( ASSE_HTTP_CACHE_CONTROL_HEADERS[ $cache_default ], array_flip( ASSE_HTTP_CACHE_CONTROL_HEADERS ) );
+    $cache_default = array_intersect_key( ASSE_HTTP_CACHE_CONTROL_DEFAULTS[ $cache_default ], array_flip( ASSE_HTTP_CACHE_CONTROL_HEADERS ) );
     $directives = [];
 
-    foreach( $default as $key => $value ) {
+    foreach( $cache_default as $key => $value ) {
         $directives[] = is_bool( $value ) ? $key : $key . '=' . $value;
     }
 
@@ -349,7 +349,7 @@ class AsseHttp {
     $to_hash  = array( $mtime, $post->post_date_gmt, $post->guid, $post->ID, serialize( $wp->query_vars ), $salt );
     $etag     = hash( 'crc32b', serialize( $to_hash ) );
 
-    if ( $weak_etag ) {
+    if ( (bool) $weak_etag ) {
       return sprintf( 'W/"%s"', $etag );
     }
 
