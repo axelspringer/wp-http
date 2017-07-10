@@ -6,7 +6,20 @@ namespace Composer\Autoload;
 
 class ComposerStaticInitc0404403422d5f202a702b39b68f2563
 {
+    public static $files = array (
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
+        'T' => 
+        array (
+            'Twig\\' => 5,
+            'Timber\\' => 7,
+        ),
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
+        ),
         'C' => 
         array (
             'Composer\\Installers\\' => 20,
@@ -14,10 +27,47 @@ class ComposerStaticInitc0404403422d5f202a702b39b68f2563
     );
 
     public static $prefixDirsPsr4 = array (
+        'Twig\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/twig/twig/src',
+        ),
+        'Timber\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/timber/timber/lib',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+        ),
         'Composer\\Installers\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
         ),
+    );
+
+    public static $fallbackDirsPsr4 = array (
+        0 => __DIR__ . '/..' . '/asm89/twig-cache-extension/lib',
+    );
+
+    public static $prefixesPsr0 = array (
+        'T' => 
+        array (
+            'Twig_' => 
+            array (
+                0 => __DIR__ . '/..' . '/twig/twig/lib',
+            ),
+        ),
+        'R' => 
+        array (
+            'Routes' => 
+            array (
+                0 => __DIR__ . '/..' . '/upstatement/routes',
+            ),
+        ),
+    );
+
+    public static $classMap = array (
+        'AltoRouter' => __DIR__ . '/..' . '/altorouter/altorouter/AltoRouter.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
@@ -25,6 +75,9 @@ class ComposerStaticInitc0404403422d5f202a702b39b68f2563
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitc0404403422d5f202a702b39b68f2563::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitc0404403422d5f202a702b39b68f2563::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr4 = ComposerStaticInitc0404403422d5f202a702b39b68f2563::$fallbackDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitc0404403422d5f202a702b39b68f2563::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitc0404403422d5f202a702b39b68f2563::$classMap;
 
         }, null, ClassLoader::class);
     }
