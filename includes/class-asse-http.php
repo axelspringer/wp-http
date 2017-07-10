@@ -36,6 +36,13 @@ class AsseHttp {
     add_action( 'template_redirect', array( &$this, 'try_catch_404' ) );
     add_action( 'template_redirect', array( &$this, 'send_extra_headers' ) );
     add_action( 'template_redirect', array( &$this, 'send_http_403' ) );
+
+    if ( $this->options['gzip']
+     && isset( $_SERVER['HTTP_ACCEPT_ENCODING'] )
+     && in_array( 'gzip', array_filter( explode( ',', $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) ) ) {
+      add_action( 'template_redirect', array( &$this, 'start_ob_gzip' ), 100 );
+      add_action( 'shutdown', array( &$this, 'end_ob_gzip' ), 100 );
+    }
 	}
 
   /**
@@ -408,6 +415,26 @@ class AsseHttp {
   }
 
   /**
+   * Gzip start
+   *
+   * @return void
+   */
+  public function start_ob_gzip() {
+    ob_start( 'ob_gzhandler' );
+  }
+
+  /**
+   * Gzip end
+   *
+   * @return void
+   */
+  public function end_ob_gzip() {
+    if ( ob_get_level() > 0 ) {
+      ob_end_flush();
+    }
+  }
+
+  /**
    * Maybe do some update things
    *
    * @return void
@@ -430,16 +457,17 @@ class AsseHttp {
    */
   public function get_options() {
     $options = array(
-      'send_cache_control_header'     => get_option( 'asse_http_send_cache_control_header' ),
-      'add_etag'                      => get_option( 'asse_http_add_etag' ),
-      'generate_weak_etag'            => get_option( 'asse_http_generate_weak_etag' ),
-      'add_last_modified'             => get_option( 'asse_http_add_last_modified' ),
-      'add_expires'                   => get_option( 'asse_http_add_expires' ),
       'add_backwards_cache_control'   => get_option( 'asse_http_add_backwards_cache_control' ),
-      'expires_max_age'               => get_option( 'asse_http_expires_max_age' ),
+      'add_etag'                      => get_option( 'asse_http_add_etag' ),
+      'add_expires'                   => get_option( 'asse_http_add_expires' ),
+      'add_last_modified'             => get_option( 'asse_http_add_last_modified' ),
       'etag_salt'                     => get_option( 'asse_http_etag_salt' ),
-      'try_rewrite_categories'        => get_option( 'asse_http_try_rewrite_categories' ),
-      'try_catch_404'                 => get_option( 'asse_http_try_catch_404' )
+      'expires_max_age'               => get_option( 'asse_http_expires_max_age' ),
+      'generate_weak_etag'            => get_option( 'asse_http_generate_weak_etag' ),
+      'gzip'                          => get_option( 'asse_http_gzip' ),
+      'send_cache_control_header'     => get_option( 'asse_http_send_cache_control_header' ),
+      'try_catch_404'                 => get_option( 'asse_http_try_catch_404' ),
+      'try_rewrite_categories'        => get_option( 'asse_http_try_rewrite_categories' )
     );
 
     return $options;

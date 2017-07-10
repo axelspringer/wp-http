@@ -52,6 +52,18 @@ class AsseHttpSettings {
 		$asse_http_send_cache_control_header = new AsseHttpSettingsField( $args );
 
     $args = array(
+			'id'				    => 'asse_http_gzip',
+			'title'				  => 'GZip',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_gzip = new AsseHttpSettingsField( $args );
+
+    $args = array(
 			'id'				    => 'asse_http_add_etag',
 			'title'				  => 'ETag',
 			'page'				  => $this->plugin_slug,
@@ -240,7 +252,7 @@ class AsseHttpSettings {
 			<div class="credits-container">
 				<div class="row">
 					<div class="col-xs-12">
-            Version <?= get_option( 'asse_akamai_version' ) ?>
+            Version <?= get_option( 'asse_http_version' ) ?>
 					</div>
 				</div>
 			</div>
