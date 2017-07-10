@@ -14,15 +14,15 @@ class AsseHttpSettings {
 
     $this->init();
 
-	  add_action(	'admin_menu',			  array( &$this, 'add_admin_menu' ) );
-	  add_action( 'admin_init',			  array( &$this, 'register_settings' ) );
-	  add_action( 'admin_notices', 		  array( &$this, 'theme_settings_admin_notices' ) );
+	add_action(	'admin_menu',			  array( &$this, 'add_admin_menu' ) );
+	add_action( 'admin_init',			  array( &$this, 'register_settings' ) );
+	add_action( 'admin_notices', 		  array( &$this, 'theme_settings_admin_notices' ) );
     add_action( 'admin_enqueue_scripts',  array( &$this, 'enqueue_admin_scripts' ) );
   }
 
   private function init() {
     $this->plugin_title       = __( 'ASSE HTTP', 'asse-http' );
-		$this->plugin_menu_title  = __( 'HTTP', 'asse-http' );
+	$this->plugin_menu_title  = __( 'HTTP', 'asse-http' );
     $this->plugin_slug        = $this->plugin_slug . '_settings_page';
 
     $this->plugin_permission  = 'manage_options';
@@ -62,6 +62,30 @@ class AsseHttpSettings {
 			'option_group'	=> $this->plugin_slug,
 		);
 		$asse_http_gzip = new AsseHttpSettingsField( $args );
+
+	$args = array(
+			'id'				    => 'asse_http_brotli',
+			'title'				  => 'Brotli',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_brotli = new AsseHttpSettingsField( $args );
+
+	$args = array(
+			'id'				    => 'asse_http_deflate',
+			'title'				  => 'Deflate (Zlib)',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_deflate = new AsseHttpSettingsField( $args );
 
     $args = array(
 			'id'				    => 'asse_http_add_etag',

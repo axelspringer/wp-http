@@ -5,6 +5,7 @@ class AsseHttp {
 	protected $settings;
 	protected $options;
   protected $headers;
+  protected $encodings;
 
   /**
    * Constructor
@@ -21,6 +22,7 @@ class AsseHttp {
 		$this->settings       = new AsseHttpSettings( ASSE_HTTP_PLUGIN_NAME );
 		$this->options        = $this->get_options();
     $this->headers        = array();
+    $this->encodings      = $this->get_encodings();
 
 		$this->register_hooks();
 	}
@@ -37,11 +39,16 @@ class AsseHttp {
     add_action( 'template_redirect', array( &$this, 'send_extra_headers' ) );
     add_action( 'template_redirect', array( &$this, 'send_http_403' ) );
 
-    if ( $this->options['gzip']
-     && isset( $_SERVER['HTTP_ACCEPT_ENCODING'] )
-     && in_array( 'gzip', array_filter( explode( ',', $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) ) ) {
+    // iterate
+    if ( $this->options['brotli'] && in_array( 'br', $this->encodings ) ) {
+      add_action( 'template_redirect', array( &$this, 'start_ob_brotli' ), 100 );
+      add_action( 'shutdown', array( &$this, 'end_ob_flush' ), 100 );
+    } else if ( $this->options['gzip'] && in_array( 'gzip', $this->encodings ) ) {
       add_action( 'template_redirect', array( &$this, 'start_ob_gzip' ), 100 );
-      add_action( 'shutdown', array( &$this, 'end_ob_gzip' ), 100 );
+      add_action( 'shutdown', array( &$this, 'end_ob_flush' ), 100 );
+    } else if ( $this->options['deflate'] && in_array( 'deflate', $this->encodings ) ) {
+      add_action( 'template_redirect', array( &$this, 'start_ob_deflate' ), 100 );
+      add_action( 'shutdown', array( &$this, 'end_ob_flush' ), 100 );
     }
 	}
 
@@ -415,6 +422,38 @@ class AsseHttp {
   }
 
   /**
+   * Get accepted encoding
+   *
+   * @return void
+   */
+  public function get_encodings() {
+    if ( ! isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) {
+      return array();
+    }
+    
+    return array_intersect( ASSE_HTTP_ACCEPT_ENCODING, array_filter( array_map( 'trim' , explode( ',', $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) ) );
+  }
+
+  /**
+   * Brotli start
+   *
+   * @return void
+   */
+  public function start_ob_brotli() {
+    ob_start( array( &$this, 'ob_brotli_handler' ) );
+  }
+
+  /**
+   * Brotli handler
+   *
+   * @return void
+   */
+  public function ob_brotli_handler( $buffer, $args ) {
+    $this->send_http_header( 'Content-Encoding: br' );
+    return brotli_compress( $buffer );
+  }
+
+  /**
    * Gzip start
    *
    * @return void
@@ -424,11 +463,30 @@ class AsseHttp {
   }
 
   /**
+   * Deflate
+   *
+   * @return void
+   */
+  public function start_ob_deflate() {
+    ob_start( array( &$this, 'ob_deflate_handler' ) );
+  }
+
+  /**
+   * Deflate handler
+   *
+   * @return void
+   */
+  public function ob_deflate_handler( $buffer, $args ) {
+    $this->send_http_header( 'Content-Encoding: deflate' );
+    return gzcompress( $buffer, ASSE_HTTP_ZLIB_LEVEL );
+  }
+
+  /**
    * Gzip end
    *
    * @return void
    */
-  public function end_ob_gzip() {
+  public function end_ob_flush() {
     if ( ob_get_level() > 0 ) {
       ob_end_flush();
     }
@@ -465,6 +523,8 @@ class AsseHttp {
       'expires_max_age'               => get_option( 'asse_http_expires_max_age' ),
       'generate_weak_etag'            => get_option( 'asse_http_generate_weak_etag' ),
       'gzip'                          => get_option( 'asse_http_gzip' ),
+      'brotli'                        => get_option( 'asse_http_brotli' ),
+      'deflate'                       => get_option( 'asse_http_deflate' ),
       'send_cache_control_header'     => get_option( 'asse_http_send_cache_control_header' ),
       'try_catch_404'                 => get_option( 'asse_http_try_catch_404' ),
       'try_rewrite_categories'        => get_option( 'asse_http_try_rewrite_categories' )

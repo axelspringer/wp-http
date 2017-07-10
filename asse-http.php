@@ -17,7 +17,7 @@
  * Plugin Name:       Asse HTTP
  * Plugin URI:        https://as-stash.axelspringer.de/projects/WPPL/repos/asse-http
  * Description:       Asse HTTP WordPress Plgin.
- * Version:           1.0.1
+ * Version:           1.0.2
  * Author:            Axel Springer
  * Author URI:        https://www.axelspringer.de
  * Text Domain:       asse-akamai
@@ -30,7 +30,7 @@ require_once( __DIR__ . '/vendor/autoload.php');
 
 // globals
 if ( ! defined( 'ASSE_HTTP_VERSION' ) ) {
-  define( 'ASSE_HTTP_VERSION', '1.0.1' );
+  define( 'ASSE_HTTP_VERSION', '1.0.2' );
 }
 
 if ( ! defined( 'ASSE_HTTP_MIN_WORDPRESS' ) ) {
@@ -153,6 +153,30 @@ if ( ! defined( 'ASSE_HTTP_CACHE_CONTROL_DEFAULTS' ) ) {
     ]
   ];
   define( 'ASSE_HTTP_CACHE_CONTROL_DEFAULTS', $cache_control_defaults );
+}
+
+if ( ! defined( 'ASSE_HTTP_ACCEPT_ENCODING' ) ) {
+  $accepted_encoding = []; // weighted
+
+  if ( function_exists( 'brotli_compress' ) ) {
+    $accepted_encoding[] = 'br';
+  }
+
+  if ( function_exists( 'ob_gzhandler' ) ) {
+    $accepted_encoding[] = 'gzip';
+
+    ini_set( 'zlib.output_compression_level', 6 );
+  }
+
+  if ( function_exists( 'gzcompress' ) ) {
+    $accepted_encoding[] = 'deflate';
+  }
+
+  define( 'ASSE_HTTP_ACCEPT_ENCODING', $accepted_encoding );
+}
+
+if ( ! defined( 'ASSE_HTTP_ZLIB_LEVEL' ) ) {
+  define( 'ASSE_HTTP_ZLIB_LEVEL', 6 );
 }
 
 // timber
