@@ -17,7 +17,7 @@
  * Plugin Name:       Asse HTTP
  * Plugin URI:        https://as-stash.axelspringer.de/projects/WPPL/repos/asse-http
  * Description:       Asse HTTP WordPress Plgin.
- * Version:           1.0.3
+ * Version:           1.0.4
  * Author:            Axel Springer
  * Author URI:        https://www.axelspringer.de
  * Text Domain:       asse-akamai
@@ -30,7 +30,7 @@ require_once( __DIR__ . '/vendor/autoload.php');
 
 // globals
 if ( ! defined( 'ASSE_HTTP_VERSION' ) ) {
-  define( 'ASSE_HTTP_VERSION', '1.0.3' );
+  define( 'ASSE_HTTP_VERSION', '1.0.4' );
 }
 
 if ( ! defined( 'ASSE_HTTP_MIN_WORDPRESS' ) ) {
@@ -177,6 +177,10 @@ if ( ! defined( 'ASSE_HTTP_ACCEPT_ENCODING' ) ) {
 
 if ( ! defined( 'ASSE_HTTP_ZLIB_LEVEL' ) ) {
   define( 'ASSE_HTTP_ZLIB_LEVEL', 6 );
+}
+
+if ( ! defined( 'ASSE_HTTP_BROTLI_LEVEL' ) ) {
+  define( 'ASSE_HTTP_BROTLI_LEVEL', 4 );
 }
 
 // timber

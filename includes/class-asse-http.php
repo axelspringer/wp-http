@@ -450,7 +450,7 @@ class AsseHttp {
    */
   public function ob_brotli_handler( $buffer, $args ) {
     $this->send_http_header( 'Content-Encoding: br' );
-    return brotli_compress( $buffer );
+    return brotli_compress( $buffer, ASSE_HTTP_BROTLI_LEVEL );
   }
 
   /**
