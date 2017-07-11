@@ -337,8 +337,8 @@ class AsseHttpSettings {
 	}
 
   public function enqueue_admin_scripts() {
-		wp_register_style( 'asse_http_admin_style', ASSE_HTTP_PLUGIN_URL . 'admin/admin.css', false, get_option('asse_akamai_version') );
-    wp_register_script( 'asse_http_admin_script' , ASSE_HTTP_PLUGIN_URL . 'admin/admin.min.js', array( 'jquery', 'wp-util'), get_option('asse_akamai_version'), true );
+		wp_register_style( 'asse_http_admin_style', ASSE_HTTP_PLUGIN_URL . 'admin/admin.css', false, get_option('asse_http_version') );
+    wp_register_script( 'asse_http_admin_script' , ASSE_HTTP_PLUGIN_URL . 'admin/admin.min.js', array( 'jquery', 'wp-util'), get_option('asse_http_version'), true );
 
     wp_enqueue_style( 'asse_http_admin_style' );
 		wp_enqueue_script( 'asse_http_admin_script' );

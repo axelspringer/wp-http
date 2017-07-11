@@ -215,4 +215,4 @@ register_activation_hook( __FILE__, 'AsseHttp::activate' );
 register_deactivation_hook( __FILE__, 'AsseHttp::deactivate' );
 
 // run
-$asse_akamai = new AsseHttp();
+$asse_http = new AsseHttp();
