@@ -14,15 +14,15 @@ class AsseHttpSettings {
 
     $this->init();
 
-	add_action(	'admin_menu',			  array( &$this, 'add_admin_menu' ) );
-	add_action( 'admin_init',			  array( &$this, 'register_settings' ) );
-	add_action( 'admin_notices', 		  array( &$this, 'theme_settings_admin_notices' ) );
+	  add_action(	'admin_menu',			  array( &$this, 'add_admin_menu' ) );
+	  add_action( 'admin_init',			  array( &$this, 'register_settings' ) );
+	  add_action( 'admin_notices', 		  array( &$this, 'theme_settings_admin_notices' ) );
     add_action( 'admin_enqueue_scripts',  array( &$this, 'enqueue_admin_scripts' ) );
   }
 
   private function init() {
     $this->plugin_title       = __( 'ASSE HTTP', 'asse-http' );
-	$this->plugin_menu_title  = __( 'HTTP', 'asse-http' );
+	  $this->plugin_menu_title  = __( 'HTTP', 'asse-http' );
     $this->plugin_slug        = $this->plugin_slug . '_settings_page';
 
     $this->plugin_permission  = 'manage_options';
@@ -30,20 +30,20 @@ class AsseHttpSettings {
 
 	public function register_settings() {
 
-    // Zugang
+    // Basic Settings
 		$args = array(
-			'id'			    => 'asse_http',
-			'title'			  => 'Einstellungen',
+			'id'			    => 'asse_http_basic',
+			'title'			  => 'Grundeinstellungen',
 			'page'			  => $this->plugin_slug,
 			'description'	=> '',
 		);
-		$asse_http = new AsseHttpSettingsSection( $args );
+		$asse_http_basic = new AsseHttpSettingsSection( $args );
 
     $args = array(
 			'id'				    => 'asse_http_send_cache_control_header',
 			'title'				  => 'Cache-Control Headers',
 			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
+			'section'			  => 'asse_http_basic',
 			'description'   => '',
 			'type'				  => 'checkbox', // text, textarea, password, checkbox
 			'multi'				  => false,
@@ -52,46 +52,10 @@ class AsseHttpSettings {
 		$asse_http_send_cache_control_header = new AsseHttpSettingsField( $args );
 
     $args = array(
-			'id'				    => 'asse_http_gzip',
-			'title'				  => 'GZip',
-			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->plugin_slug,
-		);
-		$asse_http_gzip = new AsseHttpSettingsField( $args );
-
-	$args = array(
-			'id'				    => 'asse_http_brotli',
-			'title'				  => 'Brotli',
-			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->plugin_slug,
-		);
-		$asse_http_brotli = new AsseHttpSettingsField( $args );
-
-	$args = array(
-			'id'				    => 'asse_http_deflate',
-			'title'				  => 'Deflate (Zlib)',
-			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->plugin_slug,
-		);
-		$asse_http_deflate = new AsseHttpSettingsField( $args );
-
-    $args = array(
 			'id'				    => 'asse_http_add_etag',
 			'title'				  => 'ETag',
 			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
+			'section'			  => 'asse_http_basic',
 			'description'   => '',
 			'type'				  => 'checkbox', // text, textarea, password, checkbox
 			'multi'				  => false,
@@ -100,22 +64,10 @@ class AsseHttpSettings {
 		$asse_http_add_etag = new AsseHttpSettingsField( $args );
 
     $args = array(
-			'id'				    => 'asse_http_etag_salt',
-			'title'				  => 'ETag Salt',
-			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
-			'description'   => '',
-			'type'				  => 'text', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->plugin_slug,
-		);
-		$asse_http_etag_salt = new AsseHttpSettingsField( $args );
-
-    $args = array(
 			'id'				    => 'asse_http_generate_weak_etag',
 			'title'				  => 'Weak ETag',
 			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
+			'section'			  => 'asse_http_basic',
 			'description'   => '',
 			'type'				  => 'checkbox', // text, textarea, password, checkbox
 			'multi'				  => false,
@@ -127,7 +79,7 @@ class AsseHttpSettings {
 			'id'				    => 'asse_http_add_last_modified',
 			'title'				  => 'Modified Header',
 			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
+			'section'			  => 'asse_http_basic',
 			'description'   => '',
 			'type'				  => 'checkbox', // text, textarea, password, checkbox
 			'multi'				  => false,
@@ -139,7 +91,7 @@ class AsseHttpSettings {
 			'id'				    => 'asse_http_add_expires',
 			'title'				  => 'Expries Header',
 			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
+			'section'			  => 'asse_http_basic',
 			'description'   => '',
 			'type'				  => 'checkbox', // text, textarea, password, checkbox
 			'multi'				  => false,
@@ -151,7 +103,7 @@ class AsseHttpSettings {
 			'id'				    => 'asse_http_add_backwards_cache_control',
 			'title'				  => 'Legacy Cache Control',
 			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
+			'section'			  => 'asse_http_basic',
 			'description'   => '',
 			'type'				  => 'checkbox', // text, textarea, password, checkbox
 			'multi'				  => false,
@@ -160,10 +112,22 @@ class AsseHttpSettings {
 		$asse_http_add_backwards_cache_control = new AsseHttpSettingsField( $args );
 
     $args = array(
+			'id'				    => 'asse_http_mobile_detect',
+			'title'				  => 'Mobile Geräteerkennung',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http_basic',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_mobile_detect = new AsseHttpSettingsField( $args );
+
+    $args = array(
 			'id'				    => 'asse_http_expires_max_age',
 			'title'				  => 'Expires Max-Age',
 			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
+			'section'			  => 'asse_http_basic',
 			'description'   => 'Sekunden',
 			'type'				  => 'text', // text, textarea, password, checkbox
 			'multi'				  => false,
@@ -171,11 +135,99 @@ class AsseHttpSettings {
 		);
 		$asse_http_expires_max_age = new AsseHttpSettingsField( $args );
 
+    // Compression
+		$args = array(
+			'id'			    => 'asse_http_compression',
+			'title'			  => 'Kompression',
+			'page'			  => $this->plugin_slug,
+			'description'	=> '',
+		);
+		$asse_http_compression = new AsseHttpSettingsSection( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_gzip',
+			'title'				  => 'GZip',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http_compression',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_gzip = new AsseHttpSettingsField( $args );
+
+	  $args = array(
+			'id'				    => 'asse_http_br',
+			'title'				  => 'Brotli',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http_compression',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_br = new AsseHttpSettingsField( $args );
+
+	  $args = array(
+			'id'				    => 'asse_http_deflate',
+			'title'				  => 'Deflate (Zlib)',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http_compression',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_deflate = new AsseHttpSettingsField( $args );
+
+    // CDN
+		$args = array(
+			'id'			    => 'asse_http_cdn',
+			'title'			  => 'CDN',
+			'page'			  => $this->plugin_slug,
+			'description'	=> '',
+		);
+		$asse_http_cdn = new AsseHttpSettingsSection( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_cdn',
+			'title'				  => 'CDN',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http_cdn',
+			'description'   => '',
+			'type'				  => 'dropdown', // text, textarea, password, checkbox, dropbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+      'options'       => array( AsseHttpCDN::None => 'Keins', AsseHttpCDN::Akamai => 'Akamai', AsseHttpCDN::Cloudfront => 'Cloudfront' )
+		);
+		$asse_http_cdn = new AsseHttpSettingsField( $args );
+
+    // Advanced
+		$args = array(
+			'id'			    => 'asse_http_experimental',
+			'title'			  => 'Experimental',
+			'page'			  => $this->plugin_slug,
+			'description'	=> '',
+		);
+		$asse_http_experimental = new AsseHttpSettingsSection( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_etag_salt',
+			'title'				  => 'ETag Salt',
+			'page'				  => $this->plugin_slug,
+			'section'			  => 'asse_http_experimental',
+			'description'   => '',
+			'type'				  => 'text', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->plugin_slug,
+		);
+		$asse_http_etag_salt = new AsseHttpSettingsField( $args );
+
     $args = array(
 			'id'				    => 'asse_http_try_rewrite_categories',
 			'title'				  => 'Rewrite Kategorien',
 			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
+			'section'			  => 'asse_http_experimental',
 			'description'   => 'Vorsicht!',
 			'type'				  => 'checkbox', // text, textarea, password, checkbox
 			'multi'				  => false,
@@ -187,7 +239,7 @@ class AsseHttpSettings {
 			'id'				    => 'asse_http_try_catch_404',
 			'title'				  => 'Try Catch 404',
 			'page'				  => $this->plugin_slug,
-			'section'			  => 'asse_http',
+			'section'			  => 'asse_http_experimental',
 			'description'   => 'Vorsicht!',
 			'type'				  => 'checkbox', // text, textarea, password, checkbox
 			'multi'				  => false,

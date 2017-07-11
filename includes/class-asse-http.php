@@ -11,12 +11,15 @@ class AsseHttp {
    * Constructor
    */
 	public function __construct() {
+    // include for plugin detection
 		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 
+    // if plugin not active, return
 		if ( ! is_plugin_active( 'asse-http/asse-http.php' ) ) {
 			return;
 		}
 
+    // do updating
 		$this->maybe_update();
 
 		$this->settings       = new AsseHttpSettings( ASSE_HTTP_PLUGIN_NAME );
@@ -25,6 +28,7 @@ class AsseHttp {
     $this->encodings      = $this->get_encodings();
 
 		$this->register_hooks();
+    $this->mobile_detect();
 	}
 
   /**
@@ -39,22 +43,22 @@ class AsseHttp {
     add_action( 'template_redirect', array( &$this, 'send_extra_headers' ) );
     add_action( 'template_redirect', array( &$this, 'send_http_403' ) );
 
-    // iterate
-    if ( $this->options['brotli'] && in_array( 'br', $this->encodings ) ) {
-      add_action( 'template_redirect', array( &$this, 'start_ob_brotli' ), 100 );
-      add_action( 'shutdown', array( &$this, 'end_ob_flush' ), 100 );
-    } else if ( $this->options['gzip'] && in_array( 'gzip', $this->encodings ) ) {
-      add_action( 'template_redirect', array( &$this, 'start_ob_gzip' ), 100 );
-      add_action( 'shutdown', array( &$this, 'end_ob_flush' ), 100 );
-    } else if ( $this->options['deflate'] && in_array( 'deflate', $this->encodings ) ) {
-      add_action( 'template_redirect', array( &$this, 'start_ob_deflate' ), 100 );
-      add_action( 'shutdown', array( &$this, 'end_ob_flush' ), 100 );
+    // compression
+    while( list( , $encoding ) = each( $this->encodings ) ) {
+      if ( $this->options[$encoding] ) {
+        add_action( 'template_redirect', array( &$this, 'start_ob_' . $encoding ), 100 );
+        add_action( 'shutdown', array( &$this, 'end_ob_flush' ), 100 );
+        break; // have found encoding
+      }
     }
 	}
 
   /**
-   * Try to rewrite urls
+   * Try to rewrite categories
    *
+   * This functions tries to rewrite articles to its default category.
+   *
+   * @return void
    */
   public function try_rewrite_categories() {
     global $wp_query;
@@ -101,7 +105,7 @@ class AsseHttp {
       $results = $wpdb->get_results( $wpdb->prepare(
         "
         SELECT ID
-        FROM wp_posts
+        FROM $wpdb->posts
         WHERE post_type IN ( 'page', 'post', 'attachment' )
         AND post_name = %s
         ", $wpdb->esc_like( $wp->query_vars['name'] )
@@ -430,8 +434,32 @@ class AsseHttp {
     if ( ! isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) {
       return array();
     }
-    
+
     return array_intersect( ASSE_HTTP_ACCEPT_ENCODING, array_filter( array_map( 'trim' , explode( ',', $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) ) );
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  public function mobile_detect() {
+    // if not mobile detect is enabled
+    if ( ! $this->options['mobile_detect'] ) {
+      return;
+    }
+
+    // make default detection
+    $ua = new AsseMobileDetectUA();
+
+    // specific detection for CDN's
+    if ( $this->options['cdn'] == AsseHttpCDN::Cloudfront ) {
+      $ua = new AsseMobileDetectCloudfront();
+    } elseif ( $this->options['cdn'] == AsseHttpCDN::Akamai ) {
+      $ua = new AsseMobileDetectAkamai();
+    }
+
+    $ua->set_header();
   }
 
   /**
@@ -439,8 +467,8 @@ class AsseHttp {
    *
    * @return void
    */
-  public function start_ob_brotli() {
-    ob_start( array( &$this, 'ob_brotli_handler' ) );
+  public function start_ob_br() {
+    ob_start( array( &$this, 'ob_br_handler' ) );
   }
 
   /**
@@ -448,7 +476,7 @@ class AsseHttp {
    *
    * @return void
    */
-  public function ob_brotli_handler( $buffer, $args ) {
+  public function ob_br_handler( $buffer, $args ) {
     $this->send_http_header( 'Content-Encoding: br' );
     return brotli_compress( $buffer, ASSE_HTTP_BROTLI_LEVEL );
   }
@@ -499,13 +527,12 @@ class AsseHttp {
    */
 	public function maybe_update() {
     $option  = ASSE_HTTP_PLUGIN_NAME . '_version';
-		$version = get_option( $option );
+		$old_version = get_option( $option );
 
-		if ( false === $version ) {
-      // something to update
+		if ( false === $old_version ||
+      version_compare( $old_version, ASSE_HTTP_VERSION, '<=' ) ) {
+        update_option( $option, ASSE_HTTP_VERSION );
 		}
-
-		update_option( $option, ASSE_HTTP_VERSION );
 	}
 
   /**
@@ -519,12 +546,14 @@ class AsseHttp {
       'add_etag'                      => get_option( 'asse_http_add_etag' ),
       'add_expires'                   => get_option( 'asse_http_add_expires' ),
       'add_last_modified'             => get_option( 'asse_http_add_last_modified' ),
+      'br'                            => get_option( 'asse_http_br' ),
+      'cdn'                           => get_option( 'asse_http_cdn' ),
+      'deflate'                       => get_option( 'asse_http_deflate' ),
       'etag_salt'                     => get_option( 'asse_http_etag_salt' ),
       'expires_max_age'               => get_option( 'asse_http_expires_max_age' ),
       'generate_weak_etag'            => get_option( 'asse_http_generate_weak_etag' ),
       'gzip'                          => get_option( 'asse_http_gzip' ),
-      'brotli'                        => get_option( 'asse_http_brotli' ),
-      'deflate'                       => get_option( 'asse_http_deflate' ),
+      'mobile_detect'                 => get_option( 'asse_http_mobile_detect' ),
       'send_cache_control_header'     => get_option( 'asse_http_send_cache_control_header' ),
       'try_catch_404'                 => get_option( 'asse_http_try_catch_404' ),
       'try_rewrite_categories'        => get_option( 'asse_http_try_rewrite_categories' )
@@ -539,8 +568,7 @@ class AsseHttp {
    * @return void
    */
 	public static function activate() {
-    $option  = ASSE_HTTP_PLUGIN_NAME . '_version';
-		add_option( $option, ASSE_HTTP_VERSION );
+    return;
 	}
 
   /**
@@ -549,8 +577,7 @@ class AsseHttp {
    * @return void
    */
 	public static function deactivate() {
-    $option  = ASSE_HTTP_PLUGIN_NAME . '_version';
-    remove_option( $option, ASSE_HTTP_VERSION );
+    return;
 	}
 
 }

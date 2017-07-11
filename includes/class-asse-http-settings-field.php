@@ -16,6 +16,7 @@ class AsseHttpSettingsField {
 			'placeholder'		    => NULL,
 			'sanitize_callback'	=> NULL,
 			'option_group'		  => NULL,
+      'options'           => array()
 		);
 
 		$this->args = wp_parse_args( $args, $defaults );
@@ -102,6 +103,23 @@ class AsseHttpSettingsField {
 					<?php echo $this->args['description']; ?>
 				</p>
 			</fieldset>
+    <?php
+    elseif($t == "dropdown"):
+		?>
+			<fieldset>
+				<?php
+				$args = array(
+					"name"				      => $this->args['id'],
+					"id"				        => $this->args['id'],
+					"selected"			    => get_option($this->args['id']),
+					"show_option_none"	=> __('Not selected'),
+				);
+        ?>
+        <select name="<?= $this->args['id'] ?>" id="<?= $this->args['id'] ?>" class="postform">
+        <?php foreach( $this->args['options'] as $key => $value ): ?>
+          <option value="<?= $key ?>" <?= get_option($this->args['id']) === $key ? 'selected' : '' ?>><?= $value ?></option>
+        <?php endforeach; ?>
+
 		<?php
 		elseif($t == "callback"):
 
