@@ -20,7 +20,7 @@
  * Version:           1.0.5
  * Author:            Axel Springer
  * Author URI:        https://www.axelspringer.de
- * Text Domain:       asse-akamai
+ * Text Domain:       asse-http
  */
 
 defined( 'ABSPATH' ) || exit;
