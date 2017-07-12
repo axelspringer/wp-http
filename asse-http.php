@@ -23,7 +23,10 @@
  * Text Domain:       asse-http
  */
 
+use \Asse\Plugin\Http;
+
 defined( 'ABSPATH' ) || exit;
+! class_exists( 'Http' ) || exit;
 
 // globals
 if ( ! defined( 'ASSE_HTTP_VERSION' ) ) {
@@ -180,20 +183,14 @@ if ( ! defined( 'ASSE_HTTP_BROTLI_LEVEL' ) ) {
   define( 'ASSE_HTTP_BROTLI_LEVEL', 4 );
 }
 
-// includes
-require plugin_dir_path( __FILE__ ) . 'includes/class-asse-http-abstract.php';
-require plugin_dir_path( __FILE__ ) . 'includes/class-asse-http-detect.php';
-require plugin_dir_path( __FILE__ ) . 'includes/class-asse-http.php';
-require plugin_dir_path( __FILE__ ) . 'includes/class-asse-http-settings.php';
-
 // activate
-register_activation_hook( __FILE__, 'AsseHttp::activate' );
+register_activation_hook( __FILE__, '\Asse\Plugin\Http::activate' );
 
 // deactivate
-register_deactivation_hook( __FILE__, 'AsseHttp::deactivate' );
+register_deactivation_hook( __FILE__, '\Asse\Plugin\Http::deactivate' );
 
 // run
-$asse_http = new \Asse\Plugin\Http(
+$asse_http = new Http(
   ASSE_HTTP_PLUGIN_NAME,
   ASSE_HTTP_VERSION,
   ASSE_HTTP_PLUGIN_DIR,

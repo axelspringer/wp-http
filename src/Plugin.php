@@ -1,8 +1,18 @@
 <?php
 
-namespace Asse\Plugin\Http;
+namespace Asse\Plugin;
 
-class Http extends \Asse\AbstractPlugin {
+use \Asse\Settings\Section;
+use \Asse\Settings\Page;
+use \Asse\Settings\Notice;
+use \Asse\Settings\Field;
+use \Asse\Plugin\Http\MobileDetectUA;
+use \Asse\Plugin\Http\MobileDetectCloudfront;
+use \Asse\Plugin\Http\MobileDetectAkamai;
+use \Asse\Plugin\Http\CDN;
+use \Asse\AbstractPlugin;
+
+class Http extends AbstractPlugin {
 
 	protected $settings;
   protected $headers;
@@ -17,12 +27,19 @@ class Http extends \Asse\AbstractPlugin {
 			return false;
 		}
 
-    $this->settings       = new AsseHttpSettings( $this->name );
+    // $this->settings       = new Settings( $this->name );
 		$this->options        = $this->get_options();
     $this->headers        = array();
     $this->encodings      = $this->get_encodings();
 
+    $this->title          = __( 'ASSE HTTP', 'asse-http' );
+	  $this->menu_title     = __( 'HTTP', 'asse-http' );
+    $this->settings_page  = $this->name . '_settings_page';
+    $this->permission     = 'manage_options';
+
     $this->mobile_detect();
+
+    return true;
   }
 
   /**
@@ -31,6 +48,9 @@ class Http extends \Asse\AbstractPlugin {
    * @return void
    */
 	public function register_hooks() {
+    add_action(	'admin_menu',			  array( &$this, 'admin_menu' ) );
+	  add_action( 'admin_init',			  array( &$this, 'register_settings' ) );
+
 		add_action( 'wp', array( &$this, 'send_cache_control_header' ) );
     add_action( 'template_redirect', array( &$this, 'try_rewrite_categories' ) );
     add_action( 'template_redirect', array( &$this, 'try_catch_404' ) );
@@ -444,13 +464,13 @@ class Http extends \Asse\AbstractPlugin {
     }
 
     // make default detection
-    $ua = new AsseMobileDetectUA();
+    $ua = new MobileDetectUA();
 
     // specific detection for CDN's
-    if ( $this->options['cdn'] == AsseHttpCDN::Cloudfront ) {
-      $ua = new AsseMobileDetectCloudfront();
-    } elseif ( $this->options['cdn'] == AsseHttpCDN::Akamai ) {
-      $ua = new AsseMobileDetectAkamai();
+    if ( $this->options['cdn'] == CDN::Cloudfront ) {
+      $ua = new MobileDetectCloudfront();
+    } elseif ( $this->options['cdn'] == CDN::Akamai ) {
+      $ua = new MobileDetectAkamai();
     }
 
     $ua->set_header();
@@ -539,6 +559,284 @@ class Http extends \Asse\AbstractPlugin {
     );
 
     return $options;
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  protected function version_migrate() {
+
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  public function enqueue_admin_scripts() {
+
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  public function register_settings() {
+    // Basic Settings
+		$args = array(
+			'id'			    => 'asse_http_basic',
+			'title'			  => 'Grundeinstellungen',
+			'page'			  => $this->settings_page,
+			'description'	=> '',
+		);
+		$asse_http_basic = new Section( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_send_cache_control_header',
+			'title'				  => 'Cache-Control Headers',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_basic',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_send_cache_control_header = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_add_etag',
+			'title'				  => 'ETag',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_basic',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_add_etag = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_generate_weak_etag',
+			'title'				  => 'Weak ETag',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_basic',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_generate_weak_etag = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_add_last_modified',
+			'title'				  => 'Modified Header',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_basic',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_add_last_modified = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_add_expires',
+			'title'				  => 'Expries Header',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_basic',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_add_expires = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_add_backwards_cache_control',
+			'title'				  => 'Legacy Cache Control',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_basic',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_add_backwards_cache_control = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_mobile_detect',
+			'title'				  => 'Mobile Geräteerkennung',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_basic',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_mobile_detect = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_expires_max_age',
+			'title'				  => 'Expires Max-Age',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_basic',
+			'description'   => 'Sekunden',
+			'type'				  => 'text', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_expires_max_age = new Field( $args );
+
+    // Compression
+		$args = array(
+			'id'			    => 'asse_http_compression',
+			'title'			  => 'Kompression',
+			'page'			  => $this->settings_page,
+			'description'	=> '',
+		);
+		$asse_http_compression = new Section( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_gzip',
+			'title'				  => 'GZip',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_compression',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_gzip = new Field( $args );
+
+	  $args = array(
+			'id'				    => 'asse_http_br',
+			'title'				  => 'Brotli',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_compression',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_br = new Field( $args );
+
+	  $args = array(
+			'id'				    => 'asse_http_deflate',
+			'title'				  => 'Deflate (Zlib)',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_compression',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_deflate = new Field( $args );
+
+    // CDN
+		$args = array(
+			'id'			    => 'asse_http_cdn',
+			'title'			  => 'CDN',
+			'page'			  => $this->settings_page,
+			'description'	=> '',
+		);
+		$asse_http_cdn = new Section( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_cdn',
+			'title'				  => 'CDN',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_cdn',
+			'description'   => '',
+			'type'				  => 'dropdown', // text, textarea, password, checkbox, dropbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+      'options'       => array( CDN::None => 'Keins', CDN::Akamai => 'Akamai', CDN::Cloudfront => 'Cloudfront' )
+		);
+		$asse_http_cdn = new Field( $args );
+
+    // Advanced
+		$args = array(
+			'id'			    => 'asse_http_experimental',
+			'title'			  => 'Experimental',
+			'page'			  => $this->settings_page,
+			'description'	=> '',
+		);
+		$asse_http_experimental = new Section( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_etag_salt',
+			'title'				  => 'ETag Salt',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_experimental',
+			'description'   => '',
+			'type'				  => 'text', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_etag_salt = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_try_rewrite_categories',
+			'title'				  => 'Rewrite Kategorien',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_experimental',
+			'description'   => 'Vorsicht!',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_try_rewrite_categories = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_try_catch_404',
+			'title'				  => 'Try Catch 404',
+			'page'				  => $this->settings_page,
+			'section'			  => 'asse_http_experimental',
+			'description'   => 'Vorsicht!',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox
+			'multi'				  => false,
+			'option_group'	=> $this->settings_page,
+		);
+		$asse_http_expires_max_age = new Field( $args );
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  public function admin_notices() {
+
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  public function admin_menu() {
+    add_options_page( $this->title, $this->menu_title, $this->permission, $this->settings_page, array( $this, 'settings_page' ) );
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  public function settings_page() {
+    $settings_page = new Page( $this->settings_page, $this->menu_title, $this->version );
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+	public function theme_settings_admin_notices() {
+    $admin_notice = new Notice( $this->settings_page );
   }
 
   /**

@@ -31,7 +31,7 @@ class MobileDetectCloudfront extends MobileDetect {
    */
   public function __construct() {
     $this->device = isset( $_SERVER['HTTP_CLOUDFRONT_IS_MOBILE_VIEWER'] )
-      && $_SERVER['HTTP_CLOUDFRONT_IS_MOBILE_VIEWER'] == 'true' ? AsseHttpDevice::Mobile : AsseHttpDevice::Desktop;
+      && $_SERVER['HTTP_CLOUDFRONT_IS_MOBILE_VIEWER'] == 'true' ? \Asse\Plugin\Http\Device::Mobile : \Asse\Plugin\Http\Device::Desktop;
   }
 }
 
@@ -53,7 +53,7 @@ class MobileDetectUA extends MobileDetect {
     }
 
     $this->mobile_detect = new \Mobile_Detect();
-    $this->device = $this->mobile_detect->isMobile() ? AsseHttpDevice::Mobile : AsseHttpDevice::Desktop;
+    $this->device = $this->mobile_detect->isMobile() ? \Asse\Plugin\Http\Device::Mobile : \Asse\Plugin\Http\Device::Desktop;
   }
 }
 
