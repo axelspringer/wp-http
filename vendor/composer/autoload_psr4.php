@@ -10,5 +10,6 @@ return array(
     'Timber\\' => array($vendorDir . '/timber/timber/lib'),
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src/Composer/Installers'),
+    'Asse\\' => array($baseDir . '/wp-content/plugins/asse-framework/src'),
     '' => array($vendorDir . '/asm89/twig-cache-extension/lib'),
 );

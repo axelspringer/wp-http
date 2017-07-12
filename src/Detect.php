@@ -1,6 +1,8 @@
 <?php
 
-class AsseMobileDetect {
+namespace Asse\Plugin\Http;
+
+class MobileDetect {
 
   /**
    * Undocumented variable
@@ -22,7 +24,7 @@ class AsseMobileDetect {
   }
 }
 
-class AsseMobileDetectCloudfront extends AsseMobileDetect {
+class MobileDetectCloudfront extends MobileDetect {
 
   /**
    * Undocumented function
@@ -33,7 +35,7 @@ class AsseMobileDetectCloudfront extends AsseMobileDetect {
   }
 }
 
-class AsseMobileDetectUA extends AsseMobileDetect {
+class MobileDetectUA extends MobileDetect {
 
   /**
    * Undocumented variable
@@ -55,5 +57,5 @@ class AsseMobileDetectUA extends AsseMobileDetect {
   }
 }
 
-class AsseMobileDetectAkamai extends AsseMobileDetect {
+class MobileDetectAkamai extends MobileDetect {
 }

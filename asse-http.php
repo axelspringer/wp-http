@@ -25,9 +25,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// composer
-require_once( __DIR__ . '/vendor/autoload.php');
-
 // globals
 if ( ! defined( 'ASSE_HTTP_VERSION' ) ) {
   define( 'ASSE_HTTP_VERSION', '1.0.6' );
@@ -183,30 +180,11 @@ if ( ! defined( 'ASSE_HTTP_BROTLI_LEVEL' ) ) {
   define( 'ASSE_HTTP_BROTLI_LEVEL', 4 );
 }
 
-// timber
-$timber               = new \Timber\Timber();
-$timber_context       = array();
-\Timber::$locations[] = ASSE_HTTP_PLUGIN_DIR . 'templates/';
-
-if ( version_compare( $GLOBALS['wp_version'], ASSE_HTTP_MIN_WORDPRESS, '<' ) ) {
-  add_action( 'admin_notices', function () {
-    $timber_context = array(
-      'wp_version'      => $GLOBALS['wp_version'],
-      'wp_version_min'  => ASSE_HTTP_MIN_WORDPRESS
-    );
-    Timber::render( 'notice-wp-version.twig', $timber_context );
-  } );
-
-	return false;
-}
-
 // includes
 require plugin_dir_path( __FILE__ ) . 'includes/class-asse-http-abstract.php';
 require plugin_dir_path( __FILE__ ) . 'includes/class-asse-http-detect.php';
 require plugin_dir_path( __FILE__ ) . 'includes/class-asse-http.php';
 require plugin_dir_path( __FILE__ ) . 'includes/class-asse-http-settings.php';
-require plugin_dir_path( __FILE__ ) . 'includes/class-asse-http-settings-section.php';
-require plugin_dir_path( __FILE__ ) . 'includes/class-asse-http-settings-field.php';
 
 // activate
 register_activation_hook( __FILE__, 'AsseHttp::activate' );
@@ -215,4 +193,9 @@ register_activation_hook( __FILE__, 'AsseHttp::activate' );
 register_deactivation_hook( __FILE__, 'AsseHttp::deactivate' );
 
 // run
-$asse_http = new AsseHttp();
+$asse_http = new \Asse\Plugin\Http(
+  ASSE_HTTP_PLUGIN_NAME,
+  ASSE_HTTP_VERSION,
+  ASSE_HTTP_PLUGIN_DIR,
+  ASSE_HTTP_PLUGIN_URL
+);

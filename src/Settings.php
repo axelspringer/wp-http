@@ -1,6 +1,8 @@
 <?php
 
-class AsseHttpSettings {
+namespace Asse\Plugin\Http;
+
+class Settings {
 
   protected $plugin_title;
   protected $plugin_menu_title;
@@ -37,7 +39,7 @@ class AsseHttpSettings {
 			'page'			  => $this->plugin_slug,
 			'description'	=> '',
 		);
-		$asse_http_basic = new AsseHttpSettingsSection( $args );
+		$asse_http_basic = new \Asse\Settings\Section( $args );
 
     $args = array(
 			'id'				    => 'asse_http_send_cache_control_header',
@@ -49,7 +51,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_send_cache_control_header = new AsseHttpSettingsField( $args );
+		$asse_http_send_cache_control_header = new \Asse\Settings\Field( $args );
 
     $args = array(
 			'id'				    => 'asse_http_add_etag',
@@ -61,7 +63,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_add_etag = new AsseHttpSettingsField( $args );
+		$asse_http_add_etag = new \Asse\Settings\Field( $args );
 
     $args = array(
 			'id'				    => 'asse_http_generate_weak_etag',
@@ -73,7 +75,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_generate_weak_etag = new AsseHttpSettingsField( $args );
+		$asse_http_generate_weak_etag = new \Asse\Settings\Field( $args );
 
     $args = array(
 			'id'				    => 'asse_http_add_last_modified',
@@ -85,7 +87,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_add_last_modified = new AsseHttpSettingsField( $args );
+		$asse_http_add_last_modified = new \Asse\Settings\Field( $args );
 
     $args = array(
 			'id'				    => 'asse_http_add_expires',
@@ -97,7 +99,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_add_expires = new AsseHttpSettingsField( $args );
+		$asse_http_add_expires = new \Asse\Settings\Field( $args );
 
     $args = array(
 			'id'				    => 'asse_http_add_backwards_cache_control',
@@ -109,7 +111,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_add_backwards_cache_control = new AsseHttpSettingsField( $args );
+		$asse_http_add_backwards_cache_control = new \Asse\Settings\Field( $args );
 
     $args = array(
 			'id'				    => 'asse_http_mobile_detect',
@@ -121,7 +123,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_mobile_detect = new AsseHttpSettingsField( $args );
+		$asse_http_mobile_detect = new \Asse\Settings\Field( $args );
 
     $args = array(
 			'id'				    => 'asse_http_expires_max_age',
@@ -133,7 +135,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_expires_max_age = new AsseHttpSettingsField( $args );
+		$asse_http_expires_max_age = new \Asse\Settings\Field( $args );
 
     // Compression
 		$args = array(
@@ -142,7 +144,7 @@ class AsseHttpSettings {
 			'page'			  => $this->plugin_slug,
 			'description'	=> '',
 		);
-		$asse_http_compression = new AsseHttpSettingsSection( $args );
+		$asse_http_compression = new \Asse\Settings\Section( $args );
 
     $args = array(
 			'id'				    => 'asse_http_gzip',
@@ -154,7 +156,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_gzip = new AsseHttpSettingsField( $args );
+		$asse_http_gzip = new \Asse\Settings\Field( $args );
 
 	  $args = array(
 			'id'				    => 'asse_http_br',
@@ -166,7 +168,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_br = new AsseHttpSettingsField( $args );
+		$asse_http_br = new \Asse\Settings\Field( $args );
 
 	  $args = array(
 			'id'				    => 'asse_http_deflate',
@@ -178,7 +180,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_deflate = new AsseHttpSettingsField( $args );
+		$asse_http_deflate = new \Asse\Settings\Field( $args );
 
     // CDN
 		$args = array(
@@ -187,7 +189,7 @@ class AsseHttpSettings {
 			'page'			  => $this->plugin_slug,
 			'description'	=> '',
 		);
-		$asse_http_cdn = new AsseHttpSettingsSection( $args );
+		$asse_http_cdn = new \Asse\Settings\Section( $args );
 
     $args = array(
 			'id'				    => 'asse_http_cdn',
@@ -198,9 +200,9 @@ class AsseHttpSettings {
 			'type'				  => 'dropdown', // text, textarea, password, checkbox, dropbox
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
-      'options'       => array( AsseHttpCDN::None => 'Keins', AsseHttpCDN::Akamai => 'Akamai', AsseHttpCDN::Cloudfront => 'Cloudfront' )
+      'options'       => array( \Asse\Plugin\Http\CDN::None => 'Keins', \Asse\Plugin\Http\CDN::Akamai => 'Akamai', \Asse\Plugin\Http\CDN::Cloudfront => 'Cloudfront' )
 		);
-		$asse_http_cdn = new AsseHttpSettingsField( $args );
+		$asse_http_cdn = new \Asse\Settings\Field( $args );
 
     // Advanced
 		$args = array(
@@ -209,7 +211,7 @@ class AsseHttpSettings {
 			'page'			  => $this->plugin_slug,
 			'description'	=> '',
 		);
-		$asse_http_experimental = new AsseHttpSettingsSection( $args );
+		$asse_http_experimental = new \Asse\Settings\Section( $args );
 
     $args = array(
 			'id'				    => 'asse_http_etag_salt',
@@ -221,7 +223,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_etag_salt = new AsseHttpSettingsField( $args );
+		$asse_http_etag_salt = new \Asse\Settings\Field( $args );
 
     $args = array(
 			'id'				    => 'asse_http_try_rewrite_categories',
@@ -233,7 +235,7 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_try_rewrite_categories = new AsseHttpSettingsField( $args );
+		$asse_http_try_rewrite_categories = new \Asse\Settings\Field( $args );
 
     $args = array(
 			'id'				    => 'asse_http_try_catch_404',
@@ -245,115 +247,19 @@ class AsseHttpSettings {
 			'multi'				  => false,
 			'option_group'	=> $this->plugin_slug,
 		);
-		$asse_http_expires_max_age = new AsseHttpSettingsField( $args );
+		$asse_http_expires_max_age = new \Asse\Settings\Field( $args );
 	}
 
 	public function add_admin_menu() {
-		$theme_page = add_options_page( $this->plugin_title, $this->plugin_menu_title, $this->plugin_permission, $this->plugin_slug, array( $this, 'settings_page' ) );
+	  add_options_page( $this->plugin_title, $this->plugin_menu_title, $this->plugin_permission, $this->plugin_slug, array( $this, 'settings_page' ) );
 	}
 
-	public function settings_page() {
-		?>
-		<div class="wrap afbia-settings-page">
-			<h2><span class='hidden-xs'><?= esc_html($this->plugin_menu_title) ?></span></h2>
-			<form action="options.php" method="post">
-			<?php
-				global $wp_settings_sections, $wp_settings_fields;
-				settings_fields( $this->plugin_slug );
-				$page = $this->plugin_slug;
-			?>
-			<div class="container-fluid settings-container">
-				<div class="row container-row">
-					<div class="col-xs-12 col-sm-4 col-md-3 navigation-container">
-						<ul class="navigation">
-						<?php
+  public function settings_page() {
+    \Asse\Settings\Page( $this->slug );
+  }
 
-							if ( isset( $wp_settings_sections[$page] ) ) {
-								foreach ( (array) $wp_settings_sections[$page] as $section ) {
-									echo '<li class="nav-item">';
-										echo '<a href="#'.$section['id'].'">';
-											if($section['icon'])
-												echo '<i class="fa fa-'.$section['icon'].'"></i> ';
-
-											echo '<span class="hidden-xs">' . $section['title'] . '</span>';
-
-										echo '</a>';
-									echo '</li>';
-								}
-							}
-
-						?>
-						</ul>
-					</div>
-					<div class="col-xs-12 col-sm-8 col-md-9 content-container">
-						<?php
-
-							if ( isset( $wp_settings_sections[$page] ) ) {
-								foreach ( (array) $wp_settings_sections[$page] as $section ) {
-									echo '<div class="section" id="section-'.$section['id'].'">';
-									if ( $section['icon'] ) {
-										$icon = "<i class='fa fa-{$section['icon']}'></i>";
-									} else {
-										$icon = null;
-									}
-									if ( $section['title'] )
-										echo "<h2>$icon {$section['title']}</h2>\n";
-									if ( $section['callback'] )
-										call_user_func( $section['callback'], $section );
-
-									do_action("afb_settings_section_" . $section['id']);
-
-									if ( ! isset( $wp_settings_fields ) || !isset( $wp_settings_fields[$page] ) || !isset( $wp_settings_fields[$page][$section['id']] ) ) {
-										echo '</div>';
-										continue;
-									}
-									echo '<table class="form-table">';
-										do_settings_fields( $page, $section['id'] );
-									echo '</table>';
-									echo '
-				<p class="submit">
-					<input name="Submit" type="submit" class="button-primary" value="'.esc_attr(__('Save Changes')).'" />
-				</p>';
-									echo '</div>';
-								}
-							}
-
-						?>
-					</div>
-				</div>
-			</div>
-			</form>
-
-
-			<div class="credits-container">
-				<div class="row">
-					<div class="col-xs-12">
-            Version <?= get_option( 'asse_http_version' ) ?>
-					</div>
-				</div>
-			</div>
-		</div><!-- wrap -->
-		<?php
-	}
-
-  public function enqueue_admin_scripts() {
-		wp_register_style( 'asse_http_admin_style', ASSE_HTTP_PLUGIN_URL . 'admin/admin.css', false, get_option('asse_http_version') );
-    wp_register_script( 'asse_http_admin_script' , ASSE_HTTP_PLUGIN_URL . 'admin/admin.min.js', array( 'jquery', 'wp-util'), get_option('asse_http_version'), true );
-
-    wp_enqueue_style( 'asse_http_admin_style' );
-		wp_enqueue_script( 'asse_http_admin_script' );
-	}
-
-	public function theme_settings_admin_notices(){
-		if( isset( $_GET['page'] ) && $_GET['page'] !== 'theme_settings' ){
-			return;
-		}
-
-		if( isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] === true){
-			add_settings_error( $this->plugin_slug, $this->plugin_slug, 'Erfolgreich aktualisiert.' , 'updated' );
-		}
-
-		settings_errors( $this->plugin_slug );
+	public function theme_settings_admin_notices() {
+    \Asse\Settings\Notice( $this->slug );
   }
 
 }

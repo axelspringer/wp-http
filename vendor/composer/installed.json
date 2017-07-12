@@ -6,13 +6,25 @@
         "source": {
             "type": "git",
             "url": "https://github.com/composer/installers.git",
-            "reference": "d78064c68299743e0161004f2de3a0204e33b804"
+            "reference": "d78064c68299743e0161004f2de3a0204e33b804",
+            "mirrors": [
+                {
+                    "url": "git@toran-proxy.asit.services:/data/toran-proxy/mirrors/%package%/%normalizedUrl%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "dist": {
             "type": "zip",
             "url": "https://api.github.com/repos/composer/installers/zipball/d78064c68299743e0161004f2de3a0204e33b804",
             "reference": "d78064c68299743e0161004f2de3a0204e33b804",
-            "shasum": ""
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://toran-proxy.asit.services/repo/packagist/dists/%package%/%version%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "require": {
             "composer-plugin-api": "^1.0"
@@ -106,7 +118,14 @@
             "yawik",
             "zend",
             "zikula"
-        ]
+        ],
+        "transport-options": {
+            "ssl": {
+                "verify_peer": false,
+                "verify_peer_name": false,
+                "allow_self_signed": true
+            }
+        }
     },
     {
         "name": "altorouter/altorouter",
@@ -115,13 +134,25 @@
         "source": {
             "type": "git",
             "url": "https://github.com/dannyvankooten/AltoRouter.git",
-            "reference": "09d9d946c546bae6d22a7654cdb3b825ffda54b4"
+            "reference": "09d9d946c546bae6d22a7654cdb3b825ffda54b4",
+            "mirrors": [
+                {
+                    "url": "git@toran-proxy.asit.services:/data/toran-proxy/mirrors/%package%/%normalizedUrl%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "dist": {
             "type": "zip",
             "url": "https://api.github.com/repos/dannyvankooten/AltoRouter/zipball/09d9d946c546bae6d22a7654cdb3b825ffda54b4",
             "reference": "09d9d946c546bae6d22a7654cdb3b825ffda54b4",
-            "shasum": ""
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://toran-proxy.asit.services/repo/packagist/dists/%package%/%version%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "require": {
             "php": ">=5.3.0"
@@ -159,7 +190,14 @@
             "lightweight",
             "router",
             "routing"
-        ]
+        ],
+        "transport-options": {
+            "ssl": {
+                "verify_peer": false,
+                "verify_peer_name": false,
+                "allow_self_signed": true
+            }
+        }
     },
     {
         "name": "upstatement/routes",
@@ -168,13 +206,25 @@
         "source": {
             "type": "git",
             "url": "https://github.com/Upstatement/routes.git",
-            "reference": "fae7d46f56e8b5775f072774941a5f0a25cb86f3"
+            "reference": "fae7d46f56e8b5775f072774941a5f0a25cb86f3",
+            "mirrors": [
+                {
+                    "url": "git@toran-proxy.asit.services:/data/toran-proxy/mirrors/%package%/%normalizedUrl%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "dist": {
             "type": "zip",
             "url": "https://api.github.com/repos/Upstatement/routes/zipball/fae7d46f56e8b5775f072774941a5f0a25cb86f3",
             "reference": "fae7d46f56e8b5775f072774941a5f0a25cb86f3",
-            "shasum": ""
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://toran-proxy.asit.services/repo/packagist/dists/%package%/%version%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "require": {
             "altorouter/altorouter": "1.1.0",
@@ -212,7 +262,14 @@
             "rewrite",
             "routes",
             "routing"
-        ]
+        ],
+        "transport-options": {
+            "ssl": {
+                "verify_peer": false,
+                "verify_peer_name": false,
+                "allow_self_signed": true
+            }
+        }
     },
     {
         "name": "symfony/polyfill-mbstring",
@@ -221,13 +278,25 @@
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/polyfill-mbstring.git",
-            "reference": "f29dca382a6485c3cbe6379f0c61230167681937"
+            "reference": "f29dca382a6485c3cbe6379f0c61230167681937",
+            "mirrors": [
+                {
+                    "url": "git@toran-proxy.asit.services:/data/toran-proxy/mirrors/%package%/%normalizedUrl%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "dist": {
             "type": "zip",
             "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/f29dca382a6485c3cbe6379f0c61230167681937",
             "reference": "f29dca382a6485c3cbe6379f0c61230167681937",
-            "shasum": ""
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://toran-proxy.asit.services/repo/packagist/dists/%package%/%version%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "require": {
             "php": ">=5.3.3"
@@ -273,7 +342,14 @@
             "polyfill",
             "portable",
             "shim"
-        ]
+        ],
+        "transport-options": {
+            "ssl": {
+                "verify_peer": false,
+                "verify_peer_name": false,
+                "allow_self_signed": true
+            }
+        }
     },
     {
         "name": "twig/twig",
@@ -282,13 +358,25 @@
         "source": {
             "type": "git",
             "url": "https://github.com/twigphp/Twig.git",
-            "reference": "eab7c3288ae6603d7d6f92b531626af2b162d1f2"
+            "reference": "eab7c3288ae6603d7d6f92b531626af2b162d1f2",
+            "mirrors": [
+                {
+                    "url": "git@toran-proxy.asit.services:/data/toran-proxy/mirrors/%package%/%normalizedUrl%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "dist": {
             "type": "zip",
             "url": "https://api.github.com/repos/twigphp/Twig/zipball/eab7c3288ae6603d7d6f92b531626af2b162d1f2",
             "reference": "eab7c3288ae6603d7d6f92b531626af2b162d1f2",
-            "shasum": ""
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://toran-proxy.asit.services/repo/packagist/dists/%package%/%version%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "require": {
             "php": "^7.0",
@@ -341,7 +429,14 @@
         "homepage": "http://twig.sensiolabs.org",
         "keywords": [
             "templating"
-        ]
+        ],
+        "transport-options": {
+            "ssl": {
+                "verify_peer": false,
+                "verify_peer_name": false,
+                "allow_self_signed": true
+            }
+        }
     },
     {
         "name": "asm89/twig-cache-extension",
@@ -350,13 +445,25 @@
         "source": {
             "type": "git",
             "url": "https://github.com/asm89/twig-cache-extension.git",
-            "reference": "630ea7abdc3fc62ba6786c02590a1560e449cf55"
+            "reference": "630ea7abdc3fc62ba6786c02590a1560e449cf55",
+            "mirrors": [
+                {
+                    "url": "git@toran-proxy.asit.services:/data/toran-proxy/mirrors/%package%/%normalizedUrl%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "dist": {
             "type": "zip",
             "url": "https://api.github.com/repos/asm89/twig-cache-extension/zipball/630ea7abdc3fc62ba6786c02590a1560e449cf55",
             "reference": "630ea7abdc3fc62ba6786c02590a1560e449cf55",
-            "shasum": ""
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://toran-proxy.asit.services/repo/packagist/dists/%package%/%version%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "require": {
             "php": ">=5.3.2",
@@ -397,7 +504,14 @@
             "cache",
             "extension",
             "twig"
-        ]
+        ],
+        "transport-options": {
+            "ssl": {
+                "verify_peer": false,
+                "verify_peer_name": false,
+                "allow_self_signed": true
+            }
+        }
     },
     {
         "name": "timber/timber",
@@ -406,13 +520,25 @@
         "source": {
             "type": "git",
             "url": "https://github.com/timber/timber.git",
-            "reference": "8f54e7cb27f66859f43f82d3f7ad318c772f3218"
+            "reference": "8f54e7cb27f66859f43f82d3f7ad318c772f3218",
+            "mirrors": [
+                {
+                    "url": "git@toran-proxy.asit.services:/data/toran-proxy/mirrors/%package%/%normalizedUrl%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "dist": {
             "type": "zip",
             "url": "https://api.github.com/repos/timber/timber/zipball/8f54e7cb27f66859f43f82d3f7ad318c772f3218",
             "reference": "8f54e7cb27f66859f43f82d3f7ad318c772f3218",
-            "shasum": ""
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://toran-proxy.asit.services/repo/packagist/dists/%package%/%version%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "require": {
             "asm89/twig-cache-extension": "~1.0",
@@ -462,7 +588,81 @@
             "themes",
             "timber",
             "twig"
-        ]
+        ],
+        "transport-options": {
+            "ssl": {
+                "verify_peer": false,
+                "verify_peer_name": false,
+                "allow_self_signed": true
+            }
+        }
+    },
+    {
+        "name": "wppl/asse-framework",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "ssh://git@as-stash.axelspringer.de/wppl/asse-framework.git",
+            "reference": "5165b96a637abbd9e25d8f0a9a0c4a9c980a2336",
+            "mirrors": [
+                {
+                    "url": "git@toran-proxy.asit.services:/data/toran-proxy/mirrors/%package%/%normalizedUrl%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://toran-proxy.asit.services/repo/private/dists/wppl/asse-framework/9999999-dev/5165b96a637abbd9e25d8f0a9a0c4a9c980a2336.zip",
+            "reference": "5165b96a637abbd9e25d8f0a9a0c4a9c980a2336",
+            "shasum": null,
+            "mirrors": [
+                {
+                    "url": "https://toran-proxy.asit.services/repo/private/dists/%package%/%version%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "require": {
+            "composer/installers": "1.2.*",
+            "php": "^7.0",
+            "timber/timber": "^1.3"
+        },
+        "require-dev": {
+            "psr/container": "^1.0"
+        },
+        "time": "2017-07-12T10:31:47+00:00",
+        "type": "wordpress-plugin",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "*"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Asse\\": "src/"
+            }
+        },
+        "license": [
+            "proprietary"
+        ],
+        "authors": [
+            {
+                "name": "Sebastian DÖll",
+                "email": "sebastian.doell@axelspringer.de"
+            }
+        ],
+        "description": "WordPress Framework",
+        "homepage": "https://as-stash.axelspringer.de/projects/WPPL/repos/asse-framework/browse",
+        "transport-options": {
+            "ssl": {
+                "verify_peer": false,
+                "verify_peer_name": false,
+                "allow_self_signed": true
+            }
+        }
     },
     {
         "name": "mobiledetect/mobiledetectlib",
@@ -471,13 +671,25 @@
         "source": {
             "type": "git",
             "url": "https://github.com/serbanghita/Mobile-Detect.git",
-            "reference": "f0896b5c7274d1450023b0b376240be902c3251c"
+            "reference": "f0896b5c7274d1450023b0b376240be902c3251c",
+            "mirrors": [
+                {
+                    "url": "git@toran-proxy.asit.services:/data/toran-proxy/mirrors/%package%/%normalizedUrl%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "dist": {
             "type": "zip",
             "url": "https://api.github.com/repos/serbanghita/Mobile-Detect/zipball/f0896b5c7274d1450023b0b376240be902c3251c",
             "reference": "f0896b5c7274d1450023b0b376240be902c3251c",
-            "shasum": ""
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://toran-proxy.asit.services/repo/packagist/dists/%package%/%version%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
         },
         "require": {
             "php": ">=5.0.0"
@@ -516,6 +728,13 @@
             "mobile detect",
             "mobile detector",
             "php mobile detect"
-        ]
+        ],
+        "transport-options": {
+            "ssl": {
+                "verify_peer": false,
+                "verify_peer_name": false,
+                "allow_self_signed": true
+            }
+        }
     }
 ]

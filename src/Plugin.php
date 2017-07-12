@@ -1,35 +1,29 @@
 <?php
 
-class AsseHttp {
+namespace Asse\Plugin\Http;
+
+class Http extends \Asse\AbstractPlugin {
 
 	protected $settings;
-	protected $options;
   protected $headers;
   protected $encodings;
 
-  /**
-   * Constructor
-   */
-	public function __construct() {
+  public function init() {
     // include for plugin detection
 		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 
     // if plugin not active, return
 		if ( ! is_plugin_active( 'asse-http/asse-http.php' ) ) {
-			return;
+			return false;
 		}
 
-    // do updating
-		$this->maybe_update();
-
-		$this->settings       = new AsseHttpSettings( ASSE_HTTP_PLUGIN_NAME );
+    $this->settings       = new AsseHttpSettings( $this->name );
 		$this->options        = $this->get_options();
     $this->headers        = array();
     $this->encodings      = $this->get_encodings();
 
-		$this->register_hooks();
     $this->mobile_detect();
-	}
+  }
 
   /**
    * Register Hooks
@@ -519,21 +513,6 @@ class AsseHttp {
       ob_end_flush();
     }
   }
-
-  /**
-   * Maybe do some update things
-   *
-   * @return void
-   */
-	public function maybe_update() {
-    $option  = ASSE_HTTP_PLUGIN_NAME . '_version';
-		$old_version = get_option( $option );
-
-		if ( false === $old_version ||
-      version_compare( $old_version, ASSE_HTTP_VERSION, '<=' ) ) {
-        update_option( $option, ASSE_HTTP_VERSION );
-		}
-	}
 
   /**
    * Get options
