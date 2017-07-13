@@ -2,44 +2,47 @@
 
 namespace Asse\Plugin;
 
-use \Asse\Settings\Section;
 use \Asse\Settings\Page;
 use \Asse\Settings\Notice;
-use \Asse\Settings\Field;
 use \Asse\Plugin\Http\MobileDetectUA;
 use \Asse\Plugin\Http\MobileDetectCloudfront;
 use \Asse\Plugin\Http\MobileDetectAkamai;
 use \Asse\Plugin\Http\CDN;
-use \Asse\AbstractPlugin;
+use \Asse\Plugin\Http\Defaults;
+use \Asse\Plugin\AbstractPlugin;
+use \Asse\Plugin\Http\Settings;
 
 class Http extends AbstractPlugin {
 
-	protected $settings;
   protected $headers;
   protected $encodings;
+  protected $settings;
+
+  private $accepted_encoding = array();
 
   public function init() {
     // include for plugin detection
 		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 
     // if plugin not active, return
-		if ( ! is_plugin_active( 'asse-http/asse-http.php' ) ) {
+		if ( ! is_plugin_active( $this->config->basename ) ) {
 			return false;
 		}
 
-    // $this->settings       = new Settings( $this->name );
-		$this->options        = $this->get_options();
+    class_exists( '\Asse\Plugin\WPHelper' ) || exit;
+
     $this->headers        = array();
     $this->encodings      = $this->get_encodings();
 
-    $this->title          = __( 'ASSE HTTP', 'asse-http' );
-	  $this->menu_title     = __( 'HTTP', 'asse-http' );
-    $this->settings_page  = $this->name . '_settings_page';
-    $this->permission     = 'manage_options';
+    $this->settings = new Settings(
+      __( 'ASSE HTTP', 'asse-http' ),
+      __( 'HTTP', 'asse-http' ),
+      $this->config->name . '_setting_page',
+      'manage_options',
+      $this->config->version
+    );
 
     $this->mobile_detect();
-
-    return true;
   }
 
   /**
@@ -48,7 +51,6 @@ class Http extends AbstractPlugin {
    * @return void
    */
 	public function register_hooks() {
-    add_action(	'admin_menu',			  array( &$this, 'admin_menu' ) );
 	  add_action( 'admin_init',			  array( &$this, 'register_settings' ) );
 
 		add_action( 'wp', array( &$this, 'send_cache_control_header' ) );
@@ -184,36 +186,36 @@ class Http extends AbstractPlugin {
       || is_user_logged_in()
       || is_trackback()
       || is_admin() ) ) {
-      $directives = AsseHttp::get_cache_control_directive( null );
+      $directives = Http::get_cache_control_directive( null );
     }
 
     if ( $wp_query->is_front_page() && ! is_paged() ) {
-        $directives = AsseHttp::get_cache_control_directive( 'front_page' );
+        $directives = Http::get_cache_control_directive( 'front_page' );
     } elseif ( $wp_query->is_single() ) {
-        $directives = AsseHttp::get_cache_control_directive( 'single' );
+        $directives = Http::get_cache_control_directive( 'single' );
     } elseif ( $wp_query->is_page() ) {
-        $directives = AsseHttp::get_cache_control_directive( 'page' );
+        $directives = Http::get_cache_control_directive( 'page' );
     } elseif ( $wp_query->is_home() ) {
-        $directives = AsseHttp::get_cache_control_directive( 'home' );
+        $directives = Http::get_cache_control_directive( 'home' );
     } elseif ( $wp_query->is_category() ) {
-        $directives = AsseHttp::get_cache_control_directive( 'category' );
+        $directives = Http::get_cache_control_directive( 'category' );
     } elseif ( $wp_query->is_tag() ) {
-        $directives = AsseHttp::get_cache_control_directive( 'tag' );
+        $directives = Http::get_cache_control_directive( 'tag' );
     } elseif ( $wp_query->is_author() ) {
-        $directives = AsseHttp::get_cache_control_directive( 'author' );
+        $directives = Http::get_cache_control_directive( 'author' );
     } elseif ( $wp_query->is_attachment() ) {
-        $directives = AsseHttp::get_cache_control_directive( 'attachement' );
+        $directives = Http::get_cache_control_directive( 'attachement' );
     } elseif ( $wp_query->is_search() ) {
-        $directives = AsseHttp::get_cache_control_directive( 'search' );
+        $directives = Http::get_cache_control_directive( 'search' );
     } elseif ( $wp_query->is_404() ) {
-        $directives = AsseHttp::get_cache_control_directive( '404' );
+        $directives = Http::get_cache_control_directive( '404' );
     } elseif ( $wp_query->is_date() ) {
       if ( ( is_year() && strcmp(get_the_time('Y'), date('Y')) < 0 ) ||
         ( is_month() && strcmp(get_the_time('Y-m'), date('Y-m')) < 0 ) ||
         ( ( is_day() || is_time() ) && strcmp(get_the_time('Y-m-d'), date('Y-m-d')) < 0 ) ) {
-          $directives = AsseHttp::get_cache_control_directive( 'date' );
+          $directives = Http::get_cache_control_directive( 'date' );
       } else {
-          $directives = AsseHttp::get_cache_control_directive( 'home' );
+          $directives = Http::get_cache_control_directive( 'home' );
       }
     }
 
@@ -227,11 +229,11 @@ class Http extends AbstractPlugin {
    * @return void
    */
   public static function get_cache_control_directive( $cache_default ) {
-    if ( empty( $cache_default ) || ! @array_key_exists( $cache_default, ASSE_HTTP_CACHE_CONTROL_DEFAULTS ) ) {
+    if ( empty( $cache_default ) || ! @array_key_exists( $cache_default, Defaults::CacheControl ) ) {
       return 'no-cache, no-store, must-revalidate';
     }
 
-    $cache_default = array_intersect_key( ASSE_HTTP_CACHE_CONTROL_DEFAULTS[ $cache_default ], array_flip( ASSE_HTTP_CACHE_CONTROL_HEADERS ) );
+    $cache_default = array_intersect_key( Defaults::CacheControl[ $cache_default ], array_flip( Defaults::AllowedCacheControllHeaders ) );
     $directives = [];
 
     foreach( $cache_default as $key => $value ) {
@@ -286,19 +288,19 @@ class Http extends AbstractPlugin {
     }
 
     if ( $this->options['add_etag'] ) {
-      $this->headers['ETag']  = AsseHttp::etag( $post, $mtime, $this->options['generate_weak_etag'], $this->options['etag_salt'] );
+      $this->headers['ETag']  = Http::etag( $post, $mtime, $this->options['generate_weak_etag'], $this->options['etag_salt'] );
     }
 
     if ( $this->options['add_last_modified'] ) {
-      $this->headers['Last-Modified'] = AsseHttp::last_modified( $mtime );
+      $this->headers['Last-Modified'] = Http::last_modified( $mtime );
     }
 
     if ( $this->options['add_expires'] ) {
-      $this->headers['Expires'] = AsseHttp::expires( $this->options['expires_max_age'] );
+      $this->headers['Expires'] = Http::expires( $this->options['expires_max_age'] );
     }
 
     if ( $this->options['add_backwards_cache_control'] ) {
-      $this->headers['Pragma'] = AsseHttp::pragma( $this->options['expires_max_age'] );
+      $this->headers['Pragma'] = Http::pragma( $this->options['expires_max_age'] );
     }
 
     $this->headers = apply_filters( 'asse_http_send_extra_headers', $this->headers );
@@ -449,7 +451,7 @@ class Http extends AbstractPlugin {
       return array();
     }
 
-    return array_intersect( ASSE_HTTP_ACCEPT_ENCODING, array_filter( array_map( 'trim' , explode( ',', $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) ) );
+    return array_intersect( $this->accepted_encoding, array_filter( array_map( 'trim' , explode( ',', $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) ) );
   }
 
   /**
@@ -492,7 +494,7 @@ class Http extends AbstractPlugin {
    */
   public function ob_br_handler( $buffer, $args ) {
     $this->send_http_header( 'Content-Encoding: br' );
-    return brotli_compress( $buffer, ASSE_HTTP_BROTLI_LEVEL );
+    return brotli_compress( $buffer, Defaults::BrotliCompressionLevel );
   }
 
   /**
@@ -520,7 +522,7 @@ class Http extends AbstractPlugin {
    */
   public function ob_deflate_handler( $buffer, $args ) {
     $this->send_http_header( 'Content-Encoding: deflate' );
-    return gzcompress( $buffer, ASSE_HTTP_ZLIB_LEVEL );
+    return gzcompress( $buffer, Defaults::ZLibCompressionLevel );
   }
 
   /**
@@ -539,7 +541,7 @@ class Http extends AbstractPlugin {
    *
    * @return array
    */
-  public function get_options() {
+  public function set_options() {
     $options = array(
       'add_backwards_cache_control'   => get_option( 'asse_http_add_backwards_cache_control' ),
       'add_etag'                      => get_option( 'asse_http_add_etag' ),
@@ -558,7 +560,7 @@ class Http extends AbstractPlugin {
       'try_rewrite_categories'        => get_option( 'asse_http_try_rewrite_categories' )
     );
 
-    return $options;
+    $this->options = $options;
   }
 
   /**
@@ -585,258 +587,7 @@ class Http extends AbstractPlugin {
    * @return void
    */
   public function register_settings() {
-    // Basic Settings
-		$args = array(
-			'id'			    => 'asse_http_basic',
-			'title'			  => 'Grundeinstellungen',
-			'page'			  => $this->settings_page,
-			'description'	=> '',
-		);
-		$asse_http_basic = new Section( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_send_cache_control_header',
-			'title'				  => 'Cache-Control Headers',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_basic',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_send_cache_control_header = new Field( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_add_etag',
-			'title'				  => 'ETag',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_basic',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_add_etag = new Field( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_generate_weak_etag',
-			'title'				  => 'Weak ETag',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_basic',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_generate_weak_etag = new Field( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_add_last_modified',
-			'title'				  => 'Modified Header',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_basic',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_add_last_modified = new Field( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_add_expires',
-			'title'				  => 'Expries Header',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_basic',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_add_expires = new Field( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_add_backwards_cache_control',
-			'title'				  => 'Legacy Cache Control',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_basic',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_add_backwards_cache_control = new Field( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_mobile_detect',
-			'title'				  => 'Mobile Geräteerkennung',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_basic',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_mobile_detect = new Field( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_expires_max_age',
-			'title'				  => 'Expires Max-Age',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_basic',
-			'description'   => 'Sekunden',
-			'type'				  => 'text', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_expires_max_age = new Field( $args );
-
-    // Compression
-		$args = array(
-			'id'			    => 'asse_http_compression',
-			'title'			  => 'Kompression',
-			'page'			  => $this->settings_page,
-			'description'	=> '',
-		);
-		$asse_http_compression = new Section( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_gzip',
-			'title'				  => 'GZip',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_compression',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_gzip = new Field( $args );
-
-	  $args = array(
-			'id'				    => 'asse_http_br',
-			'title'				  => 'Brotli',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_compression',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_br = new Field( $args );
-
-	  $args = array(
-			'id'				    => 'asse_http_deflate',
-			'title'				  => 'Deflate (Zlib)',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_compression',
-			'description'   => '',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_deflate = new Field( $args );
-
-    // CDN
-		$args = array(
-			'id'			    => 'asse_http_cdn',
-			'title'			  => 'CDN',
-			'page'			  => $this->settings_page,
-			'description'	=> '',
-		);
-		$asse_http_cdn = new Section( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_cdn',
-			'title'				  => 'CDN',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_cdn',
-			'description'   => '',
-			'type'				  => 'dropdown', // text, textarea, password, checkbox, dropbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-      'options'       => array( CDN::None => 'Keins', CDN::Akamai => 'Akamai', CDN::Cloudfront => 'Cloudfront' )
-		);
-		$asse_http_cdn = new Field( $args );
-
-    // Advanced
-		$args = array(
-			'id'			    => 'asse_http_experimental',
-			'title'			  => 'Experimental',
-			'page'			  => $this->settings_page,
-			'description'	=> '',
-		);
-		$asse_http_experimental = new Section( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_etag_salt',
-			'title'				  => 'ETag Salt',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_experimental',
-			'description'   => '',
-			'type'				  => 'text', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_etag_salt = new Field( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_try_rewrite_categories',
-			'title'				  => 'Rewrite Kategorien',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_experimental',
-			'description'   => 'Vorsicht!',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_try_rewrite_categories = new Field( $args );
-
-    $args = array(
-			'id'				    => 'asse_http_try_catch_404',
-			'title'				  => 'Try Catch 404',
-			'page'				  => $this->settings_page,
-			'section'			  => 'asse_http_experimental',
-			'description'   => 'Vorsicht!',
-			'type'				  => 'checkbox', // text, textarea, password, checkbox
-			'multi'				  => false,
-			'option_group'	=> $this->settings_page,
-		);
-		$asse_http_expires_max_age = new Field( $args );
-  }
-
-  /**
-   * Undocumented function
-   *
-   * @return void
-   */
-  public function admin_notices() {
-
-  }
-
-  /**
-   * Undocumented function
-   *
-   * @return void
-   */
-  public function admin_menu() {
-    add_options_page( $this->title, $this->menu_title, $this->permission, $this->settings_page, array( $this, 'settings_page' ) );
-  }
-
-  /**
-   * Undocumented function
-   *
-   * @return void
-   */
-  public function settings_page() {
-    $settings_page = new Page( $this->settings_page, $this->menu_title, $this->version );
-  }
-
-  /**
-   * Undocumented function
-   *
-   * @return void
-   */
-	public function theme_settings_admin_notices() {
-    $admin_notice = new Notice( $this->settings_page );
+    $this->settings->register();
   }
 
   /**
@@ -845,6 +596,8 @@ class Http extends AbstractPlugin {
    * @return void
    */
 	public static function activate() {
+    class_exists( '\Asse\Plugin\WPHelper' ) || die( '\'\Asse\Plugin\WPHelper\' required.' );
+
     return;
 	}
 
