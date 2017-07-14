@@ -23,9 +23,12 @@
  * Text Domain:       asse-http
  */
 
+defined( 'ABSPATH' ) || exit;
+
 use \Asse\Plugin\Http;
 
-defined( 'ABSPATH' ) || exit;
+// composer
+require_once( __DIR__ . '/vendor/autoload.php');
 
 // activate
 register_activation_hook( __FILE__, '\Asse\Plugin\Http::activate' );

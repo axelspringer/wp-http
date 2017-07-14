@@ -38,9 +38,9 @@
     {"packagist": false}
     ],
     "autoload": {
-        "psr-4" : {
-            "Asse\\" : "src/"
-        }
+      "psr-4" : {
+        "Asse\\" : "src/"
+      }
     },
     "homepage": "https://as-stash.axelspringer.de/projects/WPPL/repos/asse-http",
     "license": "proprietary",
