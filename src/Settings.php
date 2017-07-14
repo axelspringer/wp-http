@@ -199,7 +199,7 @@ final class Settings extends Config  {
 			'type'				  => 'text', // text, textarea, password, checkbox
 			'multi'				  => false,
       'disabled'      => defined( 'HTTP_ORIGIN' ),
-      'disabled_default' => $this->options['origin'],
+      'disabled_default' => HTTP_ORIGIN,
 			'option_group'	=> $this->page,
 		);
 		$asse_http_origin = new Field( $args );

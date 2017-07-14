@@ -504,7 +504,18 @@ class Http extends AbstractPlugin {
    * @return void
    */
   public function ob_replace_urls_handler( $buffer, $args  ) {
-    return str_replace( $this->options['replace_urls'], $this->options['origin'], $buffer );
+    $origin = $this->options['origin'];
+
+    if ( defined( 'HTTP_ORIGIN' )
+      && filter_var( HTTP_ORIGIN, FILTER_VALIDATE_URL) !== false ) {
+        $origin = HTTP_ORIGIN;
+      }
+
+    if ( empty( $origin ) ) {
+      return $buffer;
+    }
+
+    return str_replace( $this->options['replace_urls'], $origin, $buffer );
   }
 
   /**
@@ -590,11 +601,6 @@ class Http extends AbstractPlugin {
       'replace_urls'                  => get_option( 'asse_http_replace_urls' ),
       'origin'                        => get_option( 'asse_http_origin' )
     );
-
-    if ( defined( 'HTTP_ORIGIN' )
-      && filter_var( HTTP_ORIGIN, FILTER_VALIDATE_URL) !== false ) {
-        $options['origin'] = HTTP_ORIGIN;
-      }
 
     $this->options = $options;
   }
