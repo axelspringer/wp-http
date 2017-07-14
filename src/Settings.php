@@ -198,8 +198,8 @@ final class Settings extends Config  {
 			'description'   => 'Vorsicht! Kann nicht gesetzt werden, wenn HTTP_ORIGIN gesetzt ist',
 			'type'				  => 'text', // text, textarea, password, checkbox
 			'multi'				  => false,
-      'disabled'      => defined( 'HTTP_ORIGIN' ),
-      'disabled_default' => HTTP_ORIGIN,
+      'disabled'      => true,
+      'disabled_default' => ORIGIN_HOST,
 			'option_group'	=> $this->page,
 		);
 		$asse_http_origin = new Field( $args );
