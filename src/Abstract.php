@@ -3,9 +3,9 @@
 namespace Asse\Plugin\Http;
 
 abstract class CDN {
-  const None        = 0; // hook
-  const Akamai      = 1;
-  const Cloudfront  = 2;
+  const None        = 'none'; // hook
+  const Akamai      = 'akamai';
+  const Cloudfront  = 'cloudfront';
 }
 
 abstract class Device {
