@@ -591,11 +591,6 @@ class Http extends AbstractPlugin {
       'origin'                        => get_option( 'asse_http_origin' )
     );
 
-    // legacy hook
-    if ( defined( 'ORIGIN_HOST' ) && ! defined( 'HTTP_ORIGIN' ) ) {
-      define( 'HTTP_ORIGIN', ORIGIN_HOST );
-    }
-
     if ( defined( 'HTTP_ORIGIN' )
       && filter_var( HTTP_ORIGIN, FILTER_VALIDATE_URL) !== false ) {
         $options['origin'] = HTTP_ORIGIN;
