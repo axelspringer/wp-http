@@ -39,7 +39,8 @@ class Http extends AbstractPlugin {
       __( 'HTTP', 'asse-http' ),
       $this->config->name . '_setting_page',
       'manage_options',
-      $this->config->version
+      $this->config->version,
+      $this->options
     );
 
     $this->mobile_detect();
@@ -53,11 +54,19 @@ class Http extends AbstractPlugin {
 	public function register_hooks() {
 	  add_action( 'admin_init',			  array( &$this, 'register_settings' ) );
 
+    // header
 		add_action( 'wp', array( &$this, 'send_cache_control_header' ) );
     add_action( 'template_redirect', array( &$this, 'try_rewrite_categories' ) );
     add_action( 'template_redirect', array( &$this, 'try_catch_404' ) );
     add_action( 'template_redirect', array( &$this, 'send_extra_headers' ) );
     add_action( 'template_redirect', array( &$this, 'send_http_403' ) );
+
+    // replace urls
+    if ( $this->options['replace_urls']
+      && count( $this->options['replace_urls'] ) > 0 ) {
+      add_action( 'template_redirect', array( $this, 'start_ob_replace_urls' ), 99 );
+      add_action( 'shutdown', array( $this, 'end_ob_flush' ), 99 );
+    }
 
     // compression
     while( list( , $encoding ) = each( $this->encodings ) ) {
@@ -479,6 +488,26 @@ class Http extends AbstractPlugin {
   }
 
   /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  public function start_ob_replace_urls() {
+     ob_start( array( &$this, 'ob_replace_urls_handler' ) );
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @param [type] $buffer
+   * @param [type] $args
+   * @return void
+   */
+  public function ob_replace_urls_handler( $buffer, $args  ) {
+    return str_replace( $this->options['replace_urls'], $this->options['origin'], $buffer );
+  }
+
+  /**
    * Brotli start
    *
    * @return void
@@ -557,8 +586,20 @@ class Http extends AbstractPlugin {
       'mobile_detect'                 => get_option( 'asse_http_mobile_detect' ),
       'send_cache_control_header'     => get_option( 'asse_http_send_cache_control_header' ),
       'try_catch_404'                 => get_option( 'asse_http_try_catch_404' ),
-      'try_rewrite_categories'        => get_option( 'asse_http_try_rewrite_categories' )
+      'try_rewrite_categories'        => get_option( 'asse_http_try_rewrite_categories' ),
+      'replace_urls'                  => get_option( 'asse_http_replace_urls' ),
+      'origin'                        => get_option( 'asse_http_origin' )
     );
+
+    // legacy hook
+    if ( defined( 'ORIGIN_HOST' ) && ! defined( 'HTTP_ORIGIN' ) ) {
+      define( 'HTTP_ORIGIN', ORIGIN_HOST );
+    }
+
+    if ( defined( 'HTTP_ORIGIN' )
+      && filter_var( HTTP_ORIGIN, FILTER_VALIDATE_URL) !== false ) {
+        $options['origin'] = HTTP_ORIGIN;
+      }
 
     $this->options = $options;
   }

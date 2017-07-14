@@ -191,6 +191,32 @@ final class Settings extends Config  {
 		$asse_http_experimental = new Section( $args );
 
     $args = array(
+			'id'				    => 'asse_http_origin',
+			'title'				  => 'Origin',
+			'page'				  => $this->page,
+			'section'			  => 'asse_http_experimental',
+			'description'   => 'Vorsicht! Kann nicht gesetzt werden, wenn HTTP_ORIGIN gesetzt ist',
+			'type'				  => 'text', // text, textarea, password, checkbox
+			'multi'				  => false,
+      'disabled'      => defined( 'ORIGIN_HOST' ) || defined( 'HTTP_ORIGIN' ),
+      'disabled_default' => $this->options['origin'],
+			'option_group'	=> $this->page,
+		);
+		$asse_http_origin = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_replace_urls',
+			'title'				  => 'Urls ersetzen',
+			'page'				  => $this->page,
+			'section'			  => 'asse_http_experimental',
+			'description'   => 'Vorsicht!',
+			'type'				  => 'text', // text, textarea, password, checkbox
+			'multi'				  => true,
+			'option_group'	=> $this->page,
+		);
+		$asse_http_etag_salt = new Field( $args );
+
+    $args = array(
 			'id'				    => 'asse_http_etag_salt',
 			'title'				  => 'ETag Salt',
 			'page'				  => $this->page,
