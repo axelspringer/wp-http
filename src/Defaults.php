@@ -2,6 +2,8 @@
 
 namespace Asse\Plugin\Http;
 
+use \Asse\Plugin\Http\Encoding;
+
 abstract class Defaults {
   const CacheControl = array(
     'front_page'  => [
@@ -99,5 +101,10 @@ abstract class Defaults {
     'proxy-revalidate',
     'stale-while-revalidate',
     'stale-if-error'
+  );
+  const AcceptedEncoding = array(
+    Encoding::Brotli,
+    Encoding::GZip,
+    Encoding::Deflate
   );
 }

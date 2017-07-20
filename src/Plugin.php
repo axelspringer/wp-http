@@ -18,8 +18,6 @@ class Http extends AbstractPlugin {
   protected $encodings;
   protected $settings;
 
-  private $accepted_encoding = array();
-
   public function init() {
     // include for plugin detection
 		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
@@ -64,15 +62,15 @@ class Http extends AbstractPlugin {
     // replace urls
     if ( $this->options['replace_urls']
       && count( $this->options['replace_urls'] ) > 0 ) {
-      add_action( 'template_redirect', array( $this, 'start_ob_replace_urls' ), 99 );
-      add_action( 'shutdown', array( $this, 'end_ob_flush' ), 99 );
+      add_action( 'template_redirect', array( &$this, 'start_ob_replace_urls' ), 98 );
+      add_action( 'shutdown', array( &$this, 'end_ob_flush' ), 98 );
     }
 
     // compression
     while( list( , $encoding ) = each( $this->encodings ) ) {
       if ( $this->options[$encoding] ) {
-        add_action( 'template_redirect', array( &$this, 'start_ob_' . $encoding ), 100 );
-        add_action( 'shutdown', array( &$this, 'end_ob_flush' ), 100 );
+        add_action( 'template_redirect', array( &$this, 'start_ob_' . $encoding ), 97 );
+        add_action( 'shutdown', array( &$this, 'end_ob_flush' ), 97 );
         break; // have found encoding
       }
     }
@@ -460,7 +458,7 @@ class Http extends AbstractPlugin {
       return array();
     }
 
-    return array_intersect( $this->accepted_encoding, array_filter( array_map( 'trim' , explode( ',', $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) ) );
+    return array_intersect( Defaults::AcceptedEncoding, array_filter( array_map( 'trim' , explode( ',', $_SERVER['HTTP_ACCEPT_ENCODING'] ) ) ) );
   }
 
   /**
@@ -508,8 +506,8 @@ class Http extends AbstractPlugin {
 
     if ( defined( 'HTTP_ORIGIN' )
       && filter_var( HTTP_ORIGIN, FILTER_VALIDATE_URL) !== false ) {
-        $origin = HTTP_ORIGIN;
-      }
+      $origin = HTTP_ORIGIN;
+    }
 
     if ( empty( $origin ) ) {
       return $buffer;

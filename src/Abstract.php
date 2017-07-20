@@ -14,3 +14,9 @@ abstract class Device {
   const Tablet        = 'tablet';
   const SmartTv       = 'tv';
 }
+
+abstract class Encoding {
+  const Brotli        = 'br';
+  const GZip          = 'gzip';
+  const Deflate       = 'deflate';
+}
