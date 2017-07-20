@@ -159,6 +159,39 @@ final class Settings extends Config  {
 		);
 		$asse_http_deflate = new Field( $args );
 
+    // Monitoring
+		$args = array(
+			'id'			    => 'asse_http_health',
+			'title'			  => 'Monitoring',
+			'page'			  => $this->page,
+			'description'	=> '',
+		);
+		$asse_http_health = new Section( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_health',
+			'title'				  => 'Health Check',
+			'page'				  => $this->page,
+			'section'			  => 'asse_http_health',
+			'description'   => '',
+			'type'				  => 'checkbox', // text, textarea, password, checkbox, dropbox
+			'multi'				  => false,
+			'option_group'	=> $this->page
+		);
+		$asse_http_health_enable = new Field( $args );
+
+    $args = array(
+			'id'				    => 'asse_http_health_url',
+			'title'				  => 'Health Url',
+			'page'				  => $this->page,
+			'section'			  => 'asse_http_health',
+			'description'   => 'Z.B. /healthz',
+			'type'				  => 'text', // text, textarea, password, checkbox, dropbox
+			'multi'				  => false,
+			'option_group'	=> $this->page
+		);
+		$asse_http_healt_url= new Field( $args );
+
     // CDN
 		$args = array(
 			'id'			    => 'asse_http_cdn',

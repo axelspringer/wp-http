@@ -18,6 +18,9 @@ class Http extends AbstractPlugin {
   protected $encodings;
   protected $settings;
 
+  private $query_var;
+  private $rewrite_rule;
+
   public function init() {
     // include for plugin detection
 		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
@@ -74,7 +77,91 @@ class Http extends AbstractPlugin {
         break; // have found encoding
       }
     }
+
+    // healthz check
+    if ( $this->options['health'] ) {
+      $can_url            = ltrim( $this->options['health_url'], '/' );
+      $this->query_var    = $can_url;
+      $this->rewrite_rule = $can_url . '/?$';
+
+      add_filter( 'query_vars', array( &$this, 'add_query_vars' ) );
+      add_filter( 'redirect_canonical', array( &$this, 'prevent_redirect_canonical' ) );
+
+      add_action( 'init', array( &$this, 'rewrites_init' ) );
+      add_action( 'template_redirect', array( &$this, 'send_health' ), 0 );
+    }
 	}
+
+  /**
+   * Undocumented function
+   *
+   * @param [type] $redirect_url
+   * @return void
+   */
+  public function prevent_redirect_canonical( $redirect_url ) {
+    if ( strpos( $redirect_url, $this->url ) ) {
+      return false;
+    }
+    return $redirect_url;
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @param [type] $vars
+   * @return void
+   */
+  public function add_query_vars( $vars ) {
+    $vars[] = $this->query_var;
+    return $vars;
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  public function rewrites_init() {
+    add_rewrite_rule(
+      $this->rewrite_rule,
+      'index.php?' . $this->query_var . '=true',
+      'top'
+    );
+
+    $rules  = get_option( 'rewrite_rules' );
+    if ( ! isset( $rules[$this->rewrite_rule] ) ) {
+      global $wp_rewrite;
+      $wp_rewrite->flush_rules();
+    }
+  }
+
+  /**
+   * Undocumented function
+   *
+   * @return void
+   */
+  public function send_health() {
+
+    $is_health = get_query_var( $this->query_var, false );
+    if ( true != $is_health ) {
+      return;
+    }
+
+    header_remove();
+    ob_start();
+
+    load_template( get_template_directory() . '/single.php' );
+    $buffer = ob_get_contents();
+    ob_end_clean();
+
+    if ( count( wp_load_alloptions() ) === 0 ||
+      empty( $buffer ) ) {
+      $this->send_http_header( 'HTTP/1.1 503 Service Unavailable', true, 503 );
+      exit;
+    }
+
+    exit;
+  }
 
   /**
    * Try to rewrite categories
@@ -596,7 +683,9 @@ class Http extends AbstractPlugin {
       'try_catch_404'                 => get_option( 'asse_http_try_catch_404' ),
       'try_rewrite_categories'        => get_option( 'asse_http_try_rewrite_categories' ),
       'replace_urls'                  => get_option( 'asse_http_replace_urls' ),
-      'origin'                        => get_option( 'asse_http_origin' )
+      'origin'                        => get_option( 'asse_http_origin' ),
+      'health'                        => get_option( 'asse_http_health' ),
+      'health_url'                    => get_option( 'asse_http_health_url' )
     );
 
     $this->options = $options;
