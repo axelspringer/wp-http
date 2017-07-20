@@ -57,7 +57,7 @@ class Http extends AbstractPlugin {
     add_action( 'template_redirect', array( &$this, 'try_rewrite_categories' ) );
     add_action( 'template_redirect', array( &$this, 'try_catch_404' ) );
     add_action( 'template_redirect', array( &$this, 'send_extra_headers' ) );
-    add_action( 'template_redirect', array( &$this, 'send_http_403' ) );
+    add_action( 'template_redirect', array( &$this, 'send_http_304' ) );
 
     // replace urls
     if ( $this->options['replace_urls']
@@ -330,7 +330,6 @@ class Http extends AbstractPlugin {
     }
 
     // should check for post types
-
     if ( post_password_required() ) {
       return;
     }
@@ -387,14 +386,14 @@ class Http extends AbstractPlugin {
   public static function etag( $post, $mtime, $weak_etag, $salt = '' ) {
     global $wp;
 
-    $to_hash  = array( $mtime, $post->post_date_gmt, $post->guid, $post->ID, serialize( $wp->query_vars ), $salt );
-    $etag     = hash( 'crc32b', serialize( $to_hash ) );
+    $to_hash    = array( $mtime, $post->post_date_gmt, $post->guid, $post->ID, serialize( $wp->query_vars ), $salt );
+    $hash       = hash( 'crc32b', serialize( $to_hash ) );
 
     if ( (bool) $weak_etag ) {
-      return sprintf( 'W/"%s"', $etag );
+      return sprintf( 'W/"%s-%s"', $hash, $post->guid );
     }
 
-    return sprintf( '"%s"', $etag );
+    return sprintf( '"%s-%s"', $hash, $post->guid );
   }
 
   /**
@@ -402,7 +401,7 @@ class Http extends AbstractPlugin {
    *
    * @return void
    */
-  public function send_http_403() {
+  public function send_http_304() {
     if ( $this->options['add_etag'] &&
       isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
 
