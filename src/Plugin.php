@@ -8,6 +8,10 @@ use \Asse\Plugin\Http\MobileDetectUA;
 use \Asse\Plugin\Http\MobileDetectCloudfront;
 use \Asse\Plugin\Http\MobileDetectAkamai;
 use \Asse\Plugin\Http\CDN;
+use \Asse\Plugin\Http\Legacy;
+use \Asse\Plugin\Http\Code;
+use \Asse\Plugin\Http\Header;
+use \Asse\Plugin\Http\Encoding;
 use \Asse\Plugin\Http\Defaults;
 use \Asse\Plugin\AbstractPlugin;
 use \Asse\Plugin\Http\Settings;
@@ -156,7 +160,7 @@ class Http extends AbstractPlugin {
 
     if ( count( wp_load_alloptions() ) === 0 ||
       empty( $buffer ) ) {
-      $this->send_http_header( 'HTTP/1.1 503 Service Unavailable', true, 503 );
+      $this->send_http_header( Legacy::HTTP503, null, true, Code::HTTP503 );
       exit;
     }
 
@@ -177,7 +181,8 @@ class Http extends AbstractPlugin {
     $wp_queried_object = get_queried_object();
 
     if ( ! $this->options['try_rewrite_categories']
-      || ! ( isset ( $wp->query_vars['category_name'] ) && isset( $wp->query_vars['name'] ) ) ) {
+      || ! ( isset ( $wp->query_vars['category_name'] )
+      && isset( $wp->query_vars['name'] ) ) ) {
       return;
     }
 
@@ -190,7 +195,7 @@ class Http extends AbstractPlugin {
     $wp_url_pattern = '/^\/' . preg_quote( $wp->query_vars['category_name'], '/' ) . '/';
 
     if ( ! preg_match( $wp_url_pattern, $wp_url['path'] ) ) {
-      $this->send_http_header( 'Location: ' . $permalink, true, 301 );
+      $this->send_http_header( Header::Location, $permalink, true, 301 );
 
       exit();
     }
@@ -227,7 +232,7 @@ class Http extends AbstractPlugin {
       }
 
       $post = current( $results );
-      $this->send_http_header( 'Location: ' . get_permalink( $post->ID ), true, 301 );
+      $this->send_http_header( Header::Location, get_permalink( $post->ID ), true, 301 );
 
       exit();
     }
@@ -262,7 +267,7 @@ class Http extends AbstractPlugin {
     $directives = $this->get_cache_control_directives();
 
     if ( ! empty( $directives ) ) {
-      $this->send_http_header( 'Cache-Control: ' . $directives, true );
+      $this->send_http_header( Header::CacheControl, $directives, true );
     }
   }
 
@@ -382,25 +387,25 @@ class Http extends AbstractPlugin {
     }
 
     if ( $this->options['add_etag'] ) {
-      $this->headers['ETag']  = Http::etag( $post, $mtime, $this->options['generate_weak_etag'], $this->options['etag_salt'] );
+      $this->headers[Header::ETag]  = Http::etag( $post, $mtime, $this->options['generate_weak_etag'], $this->options['etag_salt'] );
     }
 
     if ( $this->options['add_last_modified'] ) {
-      $this->headers['Last-Modified'] = Http::last_modified( $mtime );
+      $this->headers[Header::LastModified] = Http::last_modified( $mtime );
     }
 
     if ( $this->options['add_expires'] ) {
-      $this->headers['Expires'] = Http::expires( $this->options['expires_max_age'] );
+      $this->headers[Header::Expires] = Http::expires( $this->options['expires_max_age'] );
     }
 
     if ( $this->options['add_backwards_cache_control'] ) {
-      $this->headers['Pragma'] = Http::pragma( $this->options['expires_max_age'] );
+      $this->headers[Header::Pragma] = Http::pragma( $this->options['expires_max_age'] );
     }
 
     $this->headers = apply_filters( 'asse_http_send_extra_headers', $this->headers );
 
     foreach( $this->headers as $directive => $value ) {
-      $this->send_http_header( $directive . ': ' . $value, true );
+      $this->send_http_header( $directive, $value, true );
     }
   }
 
@@ -492,14 +497,14 @@ class Http extends AbstractPlugin {
     if ( $this->options['add_etag'] &&
       isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
 
-      if ( $this->headers['ETag'] !== stripslashes( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
+      if ( $this->headers[Header::ETag] !== stripslashes( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
         return;
       }
 
       if ( false === http_response_code() ) {
-        http_response_code( 304 );
+        http_response_code( Code::HTTP304 );
       } else {
-        header( 'HTTP/1.1 304 Not Modified' );
+        header( Legacy::HTTP304 );
       }
 
       exit;
@@ -513,9 +518,9 @@ class Http extends AbstractPlugin {
       }
 
       if ( false === http_response_code() ) {
-        http_response_code( 304 );
+        http_response_code( Code::HTTP304 );
       } else {
-        header( 'HTTP/1.1 304 Not Modified' );
+        header( Legacy::HTTP304 );
       }
 
       exit;
@@ -523,13 +528,18 @@ class Http extends AbstractPlugin {
   }
 
   /**
-   * Send HTTP Header
+   * Undocumented function
    *
    * @param [type] $header
+   * @param [type] $content
    * @param boolean $replace
+   * @param [type] $response_code
    * @return void
    */
-  public function send_http_header( $header, $replace = false, $response_code = null ) {
+  public function send_http_header( $header, $content = null, $replace = false, $response_code = null ) {
+    if ( ! empty( $content ) ) {
+      $header = $header . ': ' . $content;
+    }
     $header = apply_filters( 'asse_http_send_http_header', $header );
     header( $header, $replace, $response_code );
   }
@@ -617,7 +627,7 @@ class Http extends AbstractPlugin {
    * @return void
    */
   public function ob_br_handler( $buffer, $args ) {
-    $this->send_http_header( 'Content-Encoding: br' );
+    $this->send_http_header( Header::ContentEncoding, Encoding::Brotli );
     return brotli_compress( $buffer, Defaults::BrotliCompressionLevel );
   }
 
@@ -645,7 +655,7 @@ class Http extends AbstractPlugin {
    * @return void
    */
   public function ob_deflate_handler( $buffer, $args ) {
-    $this->send_http_header( 'Content-Encoding: deflate' );
+    $this->send_http_header( Header::ContentEncoding, Encoding::Deflate );
     return gzcompress( $buffer, Defaults::ZLibCompressionLevel );
   }
 
