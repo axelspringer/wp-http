@@ -48,6 +48,8 @@ class Http extends AbstractPlugin {
       $this->options
     );
 
+    ini_set( 'zlib.output_compression_level', Defaults::GZipCompressionLevel );
+
     $this->mobile_detect();
   }
 
@@ -618,7 +620,8 @@ class Http extends AbstractPlugin {
    * @return void
    */
   public function start_ob_br() {
-    ob_start( array( &$this, 'ob_br_handler' ) );
+    if ( ! ob_start( array( &$this, 'ob_br_handler' ) ) )
+      ob_start();
   }
 
   /**
@@ -637,7 +640,8 @@ class Http extends AbstractPlugin {
    * @return void
    */
   public function start_ob_gzip() {
-    ob_start( 'ob_gzhandler' );
+    if( ! ob_start( 'ob_gzhandler') )
+      ob_start();
   }
 
   /**
@@ -646,7 +650,8 @@ class Http extends AbstractPlugin {
    * @return void
    */
   public function start_ob_deflate() {
-    ob_start( array( &$this, 'ob_deflate_handler' ) );
+    if ( ! ob_start( array( &$this, 'ob_deflate_handler' ) ) )
+      ob_start();
   }
 
   /**

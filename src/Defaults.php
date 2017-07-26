@@ -88,6 +88,7 @@ abstract class Defaults {
 
   const BrotliCompressionLevel  = 4;
   const ZLibCompressionLevel    = 6;
+  const GZipCompressionLevel    = 6;
   const AllowedCacheControllHeaders = array(
     'max-age',
     's-maxage',
