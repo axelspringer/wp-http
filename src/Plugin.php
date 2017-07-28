@@ -660,7 +660,6 @@ class Http extends AbstractPlugin {
    * @return void
    */
   public function ob_deflate_handler( $buffer, $args ) {
-    $buffer = memory_get_usage (true);
     $this->send_http_header( Header::ContentEncoding, Encoding::Deflate );
     return gzcompress( $buffer, Defaults::ZLibCompressionLevel );
   }
