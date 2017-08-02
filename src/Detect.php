@@ -22,6 +22,18 @@ class MobileDetect {
     }
     $_SERVER['HTTP_X_UA_DEVICE'] = $this->device;
   }
+
+  /**
+   * Undocumented function
+   *
+   * @param [type] $header
+   * @return boolean
+   */
+  protected static function is_mobile( $header ) {
+    return $header === 'mobile'
+      ? \Asse\Plugin\Http\Device::Mobile
+      : \Asse\Plugin\Http\Device::Desktop;
+  }
 }
 
 class MobileDetectCloudfront extends MobileDetect {
@@ -52,8 +64,16 @@ class MobileDetectUA extends MobileDetect {
       return;
     }
 
+    if ( isset( $_SERVER['HTTP-X-UA-DEVICE'] ) ) {
+      $this->device = MobileDetect::is_mobile( $_SERVER['HTTP-X-UA-DEVICE'] );
+
+      return;
+    }
+
     $this->mobile_detect = new \Mobile_Detect();
-    $this->device = $this->mobile_detect->isMobile() ? \Asse\Plugin\Http\Device::Mobile : \Asse\Plugin\Http\Device::Desktop;
+    $this->device = $this->mobile_detect->isMobile()
+      ? \Asse\Plugin\Http\Device::Mobile
+      : \Asse\Plugin\Http\Device::Desktop;
   }
 }
 
