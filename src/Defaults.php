@@ -1,8 +1,6 @@
 <?php
 
-namespace Asse\Plugin\Http;
-
-use \Asse\Plugin\Http\Encoding;
+namespace AxelSpringer\WP\HTTP;
 
 abstract class Defaults {
   const CacheControl = array(

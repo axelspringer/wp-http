@@ -1,6 +1,6 @@
 <?php
 
-namespace Asse\Plugin\Http;
+namespace AxelSpringer\WP\HTTP;
 
 class MobileDetect {
 

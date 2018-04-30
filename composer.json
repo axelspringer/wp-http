@@ -1,7 +1,7 @@
 {
-    "name": "wppl/asse-http",
+    "name": "axelspringer/wp-http",
     "type": "wordpress-plugin",
-    "description": "Asse HTTP for Wordpress",
+    "description": "A companion plugin for WordPress to fully support HTTP",
     "keywords": [
         "wordpress",
         "plugin",
@@ -9,17 +9,15 @@
     ],
     "autoload": {
       "psr-4" : {
-        "Asse\\" : "src/"
+        "AxelSpringer\\WP\\HTTP\\" : "src/"
       }
     },
-    "homepage": "https://as-stash.axelspringer.de/projects/WPPL/repos/asse-http",
-    "license": "proprietary",
+    "homepage": "https://github.com/axelspringer/wp-http",
+    "license": "Apache-2.0",
     "authors": [
     ],
     "require": {
-        "mobiledetect/mobiledetectlib": "^2.8"
-    },
-    "extra": {
-        "installer-name": "asse-http"
+        "mobiledetect/mobiledetectlib": "^2.8",
+        "axelspringer/wp-bootstrap": "dev-master"
     }
 }

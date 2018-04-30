@@ -1,56 +1,39 @@
 <?php
 
-namespace Asse\Plugin;
+namespace AxelSpringer\WP\HTTP;
 
-use \Asse\Settings\Page;
-use \Asse\Settings\Notice;
-use \Asse\Plugin\Http\MobileDetectUA;
-use \Asse\Plugin\Http\MobileDetectCloudfront;
-use \Asse\Plugin\Http\MobileDetectAkamai;
-use \Asse\Plugin\Http\CDN;
-use \Asse\Plugin\Http\Legacy;
-use \Asse\Plugin\Http\Code;
-use \Asse\Plugin\Http\Header;
-use \Asse\Plugin\Http\Encoding;
-use \Asse\Plugin\Http\Defaults;
-use \Asse\Plugin\AbstractPlugin;
-use \Asse\Plugin\Http\Settings;
+use AxelSpringer\WP\Bootstrap\Plugin\AbstractPlugin;
 
-class Http extends AbstractPlugin {
+class Plugin extends AbstractPlugin {
 
   protected $headers;
   protected $encodings;
-  protected $settings;
+
+  public $settings;
 
   private $query_var;
   private $rewrite_rule;
 
   public function init() {
-    // include for plugin detection
-		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-
-    // if plugin not active, return
-		if ( ! is_plugin_active( $this->config->basename ) ) {
-			return false;
-		}
-
-    class_exists( '\Asse\Plugin\WPHelper' ) || exit;
-
     $this->headers        = array();
     $this->encodings      = $this->get_encodings();
 
+    // load options
+    $this->setup->load_options( 'AxelSpringer\WP\HTTP\__OPTION__' );
     $this->settings = new Settings(
-      __( 'ASSE HTTP', 'asse-http' ),
-      __( 'HTTP', 'asse-http' ),
-      $this->config->name . '_setting_page',
-      'manage_options',
-      $this->config->version,
-      $this->options
+        __( __TRANSLATE__::SETTINGS_PAGE_TITLE ),
+        __( __TRANSLATE__::SETTINGS_MENU_TITLE ),
+        __PLUGIN__::SETTINGS_PAGE,
+        __PLUGIN__::SETTINGS_PERMISSION,
+        $this->setup->version
     );
 
     ini_set( 'zlib.output_compression_level', Defaults::GZipCompressionLevel );
 
     $this->mobile_detect();
+
+    // load hooks
+    $this->load_hooks();
   }
 
   /**
@@ -58,9 +41,7 @@ class Http extends AbstractPlugin {
    *
    * @return void
    */
-	public function register_hooks() {
-	  add_action( 'admin_init',			  array( &$this, 'register_settings' ) );
-
+	public function load_hooks() {
     // header
 		add_action( 'wp', array( &$this, 'send_cache_control_header' ) );
     add_action( 'template_redirect', array( &$this, 'try_rewrite_categories' ) );
@@ -725,12 +706,21 @@ class Http extends AbstractPlugin {
   }
 
   /**
-   * Undocumented function
-   *
-   * @return void
+   * Do actions after init
    */
-  public function register_settings() {
-    $this->settings->register();
+  public function after_init()
+  {
+    // noop
+  }
+
+  /**
+   * Enqueue required scripts
+   *
+   * @return
+   */
+  public function enqueue_scripts()
+  {
+
   }
 
   /**
@@ -738,10 +728,8 @@ class Http extends AbstractPlugin {
    *
    * @return void
    */
-	public static function activate() {
-    class_exists( '\Asse\Plugin\WPHelper' ) || die( '\'\Asse\Plugin\WPHelper\' required.' );
-
-    return;
+	public static function activation() {
+    return true;
 	}
 
   /**
@@ -749,7 +737,7 @@ class Http extends AbstractPlugin {
    *
    * @return void
    */
-	public static function deactivate() {
+	public static function deactivation() {
     return;
 	}
 

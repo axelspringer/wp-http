@@ -1,14 +1,19 @@
 <?php
 
-namespace Asse\Plugin\Http;
+namespace AxelSpringer\WP\HTTP;
 
-use \Asse\Settings\Section;
-use \Asse\Settings\Field;
-use \Asse\Settings\Config;
+use AxelSpringer\WP\Bootstrap\Settings\AbstractSettings;
+use AxelSpringer\WP\Bootstrap\Settings\Page;
+use AxelSpringer\WP\Bootstrap\Settings\Field;
+use AxelSpringer\WP\Bootstrap\Settings\Section;
 
-final class Settings extends Config  {
+class Settings extends AbstractSettings {
 
-  public function register() {
+  /**
+   * Loading the settings for the plugin
+   */
+  public function load_settings()
+  {
     // Basic Settings
 		$args = array(
 			'id'			    => 'asse_http_basic',
@@ -232,7 +237,7 @@ final class Settings extends Config  {
 			'type'				  => 'text', // text, textarea, password, checkbox
 			'multi'				  => false,
       'disabled'      => true,
-      'disabled_default' => ORIGIN_HOST,
+      'disabled_default' => ORIGIN_HOST, // todo
 			'option_group'	=> $this->page,
 		);
 		$asse_http_origin = new Field( $args );
